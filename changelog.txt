@@ -1,0 +1,5 @@
+0.1
+----
+* Sentinel2 and Formosat2 support for producing indice
+* Metadata generation for raster TimeSeries Manager Qgis plugin
+

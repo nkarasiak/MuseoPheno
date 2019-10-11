@@ -1,0 +1,130 @@
+
+
+Examples using ``museopheno.datasets.Sentinel2_3a_2018``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an expression or an indice in a time series (or at one acquis...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/indices/images/thumb/sphx_glr_computeIndices_noSensorDefined_thumb.png
+
+        :ref:`sphx_glr_auto_examples_indices_computeIndices_noSensorDefined.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_indices_computeIndices_noSensorDefined.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to produce a NDVI time series from a Sentinel-2 time series. ">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_generateNDVIRaster_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here LChloC) from a S2 with 10 bands. The raster i...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_LeafChlorophyllContentFromS2TimeSeries_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add or modify an indice for a specific sensor. Here we add/modify the...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndiceToSensor_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_addIndiceToSensor.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_addIndiceToSensor.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here NDVI) from a S2 with 10 bands. The raster is ...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_NDVI_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here LChloC) from a S2 with 10 bands. The raster i...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_LChloC_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add to a raster spectral indices. Here we add LChloC and ACORVI (a mo...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndicestoRaster_thumb.png
+
+        :ref:`sphx_glr_auto_examples_sensors_addIndicestoRaster.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_sensors_addIndicestoRaster.py`

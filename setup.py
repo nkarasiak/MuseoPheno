@@ -10,7 +10,7 @@
 #
 # @author:  Nicolas Karasiak
 # @site:    www.karasiak.net
-# @git:     www.github.com/nkarasiak/MuseoToolBox
+# @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
 import re
 
@@ -42,6 +42,11 @@ setuptools.setup(
             "Programming Language :: Python :: 3",
             "Intended Audience :: Science/Research"],
     zip_safe=False,
+        entry_points = {
+        'console_scripts': [
+            'museopheno.computeS2SITS=museopheno.sensors.__computeS2SITS:main'
+        ],
+    },
     package_data={
       'museopheno': ['datasets/2018_3A_Theia_Bouconne.tif']
    }

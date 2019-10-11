@@ -1,0 +1,22 @@
+
+
+Examples using ``museopheno.indices.generateIndice``
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+.. raw:: html
+
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an expression or an indice in a time series (or at one acquis...">
+
+.. only:: html
+
+    .. figure:: /auto_examples/indices/images/thumb/sphx_glr_computeIndices_noSensorDefined_thumb.png
+
+        :ref:`sphx_glr_auto_examples_indices_computeIndices_noSensorDefined.py`
+
+.. raw:: html
+
+    </div>
+
+.. only:: not html
+
+    * :ref:`sphx_glr_auto_examples_indices_computeIndices_noSensorDefined.py`
