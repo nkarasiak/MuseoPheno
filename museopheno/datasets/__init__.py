@@ -22,7 +22,6 @@ __pathFile = os.path.dirname(os.path.realpath(__file__))
 
 def Sentinel2_3a_2018(return_dates=False, get_only_sample=False):
     """
-
     Sentinel2 sample dataset on Bouconne Forest (France, near Toulouse).
     Bands are ordered this way : '2','3','4','8','5','6','7','8','8A','11','12'.
 

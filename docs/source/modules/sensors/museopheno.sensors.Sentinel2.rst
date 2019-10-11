@@ -18,6 +18,7 @@ Sentinel2
       ~Sentinel2.computeSITS
       ~Sentinel2.generateIndice
       ~Sentinel2.generateRaster
+      ~Sentinel2.generateTemporalSampling
       ~Sentinel2.getIndiceExpression
       ~Sentinel2.setDescriptionMetadata
    

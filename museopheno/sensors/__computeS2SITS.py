@@ -154,13 +154,13 @@ def computeSITS(
     YYYYMMDDend = p.search(S2[0]).end()
 
     if resampleCSV is False:
-        sampleTime = [p.findall(S2folder)[0] for S2folder in S2]
-        sampleTimeCsv = os.path.join(outDir, 'sample_time.csv')
+        AcquisitionDates = [p.findall(S2folder)[0] for S2folder in S2]
+        AcquisitionDatesCsv = os.path.join(outDir, 'sample_time.csv')
         np.savetxt(
-            sampleTimeCsv,
+            AcquisitionDatesCsv,
             np.sort(
                 np.asarray(
-                    sampleTime,
+                    AcquisitionDates,
                     dtype=np.int)),
             fmt='%d')
 
@@ -325,13 +325,13 @@ def computeSITS(
     app.SetParameterOutputImagePixelType(
         "out", otbApplication.ImagePixelType_int16)  # int16 = 1
     app.SetParameterString("it", interpolation)
-    app.SetParameterString("id", sampleTimeCsv)
+    app.SetParameterString("id", AcquisitionDatesCsv)
     app.SetParameterInt("comp", len(bands))
     app.SetParameterInt("ram", ram)
     if resampleCSV:
         app.SetParameterString("od", resampleCSV)
     else:
-        app.SetParameterString("od", sampleTimeCsv)
+        app.SetParameterString("od", AcquisitionDatesCsv)
 
     if onlyROI is False:
         # writing raster

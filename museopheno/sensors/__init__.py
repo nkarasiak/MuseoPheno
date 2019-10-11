@@ -12,7 +12,7 @@
 # @site:    www.karasiak.net
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
-
+import glob
 import numpy as np
 import gdal
 from .. import indices
@@ -376,6 +376,61 @@ class Sentinel2(sensorManager):
                     indices[indice][0],
                     indices[indice][1],
                     compulsory=False)
+
+    def generateTemporalSampling(S2_dir,start_date=False,last_date=False,day_interval=5,save_csv=False):
+        """
+        Generate sample time for gap-filling of Time Series
+        
+        Parameters
+        -----------
+        S2_dir : str
+            path of the folder where zip or unzipped S2 tiles are.
+        start_date : False str or int, default false.
+            If str or int, use %Y%m%d format, e.g. '20180130'.
+        end_date : False, str or int, default False.
+            If str or int, use %Y%m%d format, e.g. '20181230'.
+        day_interval : int, default 5
+            The delta days interval from the first acquistion to the last
+        save_csv : False or str, default False
+            If str, path where the csv file will be saved.
+        """
+        # =============================================================================
+        #     List all subfolders which begins with SENTINEL2
+        #     if no last_date and start_date given
+        # =============================================================================
+        AcquisitionDates = [start_date,last_date]
+        if last_date is False or start_date is False:
+            S2 = glob.glob(glob.os.path.join(S2_dir, 'SENTINEL2*/'))
+    
+            # if no folder, looking for zip files
+            if S2 == []:
+                S2 = glob.glob(glob.os.path.join(S2_dir, 'SENTINEL2*.zip'))
+    
+            else:
+                S2 = [glob.os.path.basename(glob.os.path.dirname(S2Folder))
+                      for S2Folder in S2]
+    
+            # ==========================================================================
+            #     Detecting YYYYMMDD date format
+            # ==========================================================================
+    
+            import re
+            regexYYYYMMDD = r"(?<!\d)(?:(?:20\d{2})(?:(?:(?:0[13578]|1[02])31)|(?:(?:0[1,3-9]|1[0-2])(?:29|30)))|(?:(?:20(?:0[48]|[2468][048]|[13579][26]))0229)|(?:20\d{2})(?:(?:0?[1-9])|(?:1[0-2]))(?:0?[1-9]|1\d|2[0-8]))(?!\d)"
+            p = re.compile(regexYYYYMMDD)
+    
+            AcquisitionDates = sorted([p.findall(S2folder)[0] for S2folder in S2])
+    
+    
+        
+        if start_date is False:
+            start_date = AcquisitionDates[0]
+        if last_date is False:
+            last_date = AcquisitionDates[-1]
+
+        from museopheno.time_series import generateTemporalSampling
+        
+        return generateTemporalSampling(AcquisitionDates[0],AcquisitionDates[-1],day_interval=day_interval,save_csv=save_csv)
+        
 
     def computeSITS(self, S2dir, out_SITS, resample_CSV=False, interpolation='linear', unzip=False,
                     out_cloudMask=False, check_outlier=False, use_flatreflectance=True, n_jobs=1, ram=4000):

@@ -13,3 +13,5 @@
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
 __version__ = "0.1"
+
+from museopheno import indices,datasets,sensors,time_series
