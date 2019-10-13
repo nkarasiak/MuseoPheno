@@ -43,7 +43,6 @@ print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
 # List of available indice : 
 S2.available_indices.keys()
 
-
 ###########################################################
 # Write metadata in each band (date + band name)
 # ------------------------------------------------------

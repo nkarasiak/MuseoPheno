@@ -19,19 +19,24 @@ np.seterr(divide='ignore')
 
 
 def __convertBandToArrayIdx(X, expression, n_comp,
-                            date, band_order, condition=False, nodata=-9999):
+                            date, band_order, condition=False, order_by='date', nodata=-9999):
     X = np.copy(X)
 #    bandsToChange = re.findall('B[0-9]*',str(expression))
     bandsToChange = re.findall('B[0-9]*[A-Z]*', str(expression))
     out = np.zeros(X[:, 0].shape)
     out[:] = nodata
 
-    for band in set(bandsToChange):
+    for band in set(bandsToChange):  # set to order band
         originalBand = band[1:]  # to remove B
         while originalBand[0] == '0':
             originalBand = originalBand[1:]
         bandIdx = np.where(np.in1d(band_order, originalBand) == True)[0]
-        newBand = n_comp * (date) + (bandIdx)
+
+        if order_by == 'date':
+            newBand = n_comp * date + bandIdx
+        elif order_by == 'band':
+            newBand = bandIdx*date+n_comp
+
         if condition:
             condition = condition.replace(band, "X[:,{}]".format(newBand))
         expression = expression.replace(band, "X[:,{}]" .format(newBand))
@@ -98,7 +103,7 @@ def areBandsAvailables(band_order, expression, compulsory=True):
 
 
 def generateIndice(X, band_order, expression, interpolate_nan=True,
-                   divide_X_by=1, multiply_by=1, dtype=np.float32):
+                   divide_X_by=1, multiply_by=1, order_by='date', dtype=np.float32):
     """
     Generate indice from an array according to a band_order, and expression.
 
@@ -120,6 +125,9 @@ def generateIndice(X, band_order, expression, interpolate_nan=True,
         Value to divide X before computing the indice
     multiply_by : integer or float, default 1.
         Value to multiply the result (e.g. 100 to set the NDVI between -100 and 100)
+    order_by : str, default 'date'.
+        if 'date', means your raster is stacked in this way : B1, B2 to Bx for the first date, then B1,B2 to Bx for the second date...
+        if 'band', means your raster is stacked in this way : B1 first date, B1 second date... to B1 last date, then B2 first date...
     dtype : numpy dtype, default np.float32
         dtype of the output (e.g. np.int16 to store the NDVI in integer value)
 
@@ -162,7 +170,7 @@ def generateIndice(X, band_order, expression, interpolate_nan=True,
                 else:
                     condition = False
             dateIndice = __convertBandToArrayIdx(
-                X, mathExp, n_comp, date, band_order, condition=condition)
+                X, mathExp, n_comp, date, band_order, condition=condition, order_by=order_by)
             outIndice[:, date] = dateIndice
 
         if interpolate_nan:

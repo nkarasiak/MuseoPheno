@@ -47,26 +47,22 @@ class sensorManager:
         self.n_bands = len(self.band_order)
         self.wavelengths = wavelengths
         self.available_indices = dict()
-        
-        self.__configureTimeSeries() # useless for now
 
-    def __configureTimeSeries(self, order_by='date'):
+        self.configureBandsOrder()  # useless for now
+
+    def configureBandsOrder(self, order_by='date'):
         """
-        Configure if bands are ordered by date or by band
+        Configure how bands are ordered (by date or by band)
 
         Parameters
         -----------
-
         order_by : str, default 'date'.
             if 'date', means your raster is stacked in this way : B1, B2 to Bx for the first date, then B1,B2 to Bx for the second date...
             if 'band', means your raster is stacked in this way : B1 first date, B1 second date... to B1 last date, then B2 first date...
         """
-        if not order_by in ['date', 'band']:
+        if not order_by.lower() in ['date', 'band']:
             raise ValueError(
                 'Sorry, but MuseoPheno only manages raster organized by date or band')
-        if order_by == 'band':
-            raise ValueError(
-                'Sorry, but MuseoPheno has not yet implemented stack per band')
 
         self.order_by = order_by
 
@@ -159,7 +155,8 @@ class sensorManager:
             expression=expression,
             interpolate_nan=interpolate_nan,
             dtype=dtype,
-            multiply_by=multiply_by)
+            multiply_by=multiply_by,
+            order_by=self.order_by)
         return X_
 
     def generateRaster(self, input_raster, output_raster, expression,
@@ -197,14 +194,16 @@ class sensorManager:
             band_order=self.band_order,
             expression=expression,
             interpolate_nan=interpolate_nan,
-            multiply_by=multiply_by)
+            multiply_by=multiply_by,
+            order_by=self.order_by)
         rM.run()
 
     def setDescriptionMetadata(self, input_raster, dates):
         """
+        Write metadata (band and date) in raster.
+
         Parameters
         -----------
-
         input_raster : str.
             Path of the raster to write in the metadata each band number and date.
         dates : list.
@@ -221,7 +220,6 @@ class sensorManager:
         https://raster-timeseries-manager.readthedocs.io/en/latest/content.html#data-format
         """
         ds = gdal.Open(input_raster)
-        nb = ds.RasterCount
 
         def convertDateFormat(date):
             if not isinstance(date, str):
@@ -231,11 +229,13 @@ class sensorManager:
             return date
 
         for idx, band in enumerate(self.band_order):
-            for i in range(int(nb / self.n_bands)):
-                bandPos = (idx + 1) + (self.n_bands * i)
-                date = convertDateFormat(dates[i])
-                ds.GetRasterBand(bandPos).SetDescription(
-                    date + ' - ' + self.band_order[idx])
+            for date in range(len(dates)):
+                if self.order_by == 'date':
+                    band_pos = (idx+1) + (len(self.band_order) * date)
+                elif self.order_by == 'band':
+                    band_pos = int(idx*(len(dates))+date)+1
+                ds.GetRasterBand(band_pos).SetDescription(
+                    convertDateFormat(dates[date]) + ' - ' + band)
         if self.band_name:
             ds.SetMetadataItem(
                 'names',
@@ -326,46 +326,47 @@ class Sentinel2(sensorManager):
                           'SWIR2'][:self.n_bands]
 
         indices = dict(
-                    ACORVI=['( B8 - B4 + 0.05 ) / ( B8 + B4 + 0.05 ) ', '(B8+B4+0.05) != 0'],
-                    ACORVInarrow=[
-                    '( B8A - B4 + 0.05 ) / ( B8A + B4 + 0.05 ) ',
-                    '(B8A+B4+0.05) != 0'],
-                    SAVI=['1.5 * (B8 - B4) / ( B8 + B4 + 0.5 )'],
-                    EVI=['( 2.5 * ( B8 - B4 ) ) / ( ( B8 + 6 * B4 - 7.5 * B2 ) + 1 )'],
-                    EVI2=[
-                    '( 2.5 * (B8 - B4) ) / (B8 + 2.4 * B4 + 1) ',
-                    'B8+2.4*B4+1 != 0'],
-                    PSRI=['( (B4 - B2) / B5 )', 'B5 != 0'],
-                    ARI=[
-                    '( 1 / B3 ) - ( 1 / B5 )',
-                    'np.logical_and(B3 != 0, B5 != 0)'],
-                    ARI2=[
-                    '( B8 / B2 ) - ( B8 / B3 )',
-                    ' np.logical_and(B2 != 0, B3 != 0)'],
-                    MARI=['( (B5 - B5 ) - 0.2 * (B5 - B3) ) * (B5 / B4)', 'B4 != 0'],
-                    CHLRE=['np.power(B5 / B7,-1.0)', 'B5!=0'],
-                    MCARI=[
-                    ' ( ( B5 - B4 ) - 0.2 * ( B5 - B3 ) ) * ( B5 / B4 )',
-                    'B4 != 0'],
-                    MSI=['B11 / B8', 'B8 != 0'],
-                    MSIB12=['B12 / B8', 'B8 != 0'],
-                    NDrededgeSWIR=['( B6 - B12 ) / ( B6 + B12 )', '( B6 + B12 ) != 0'],
-                    SIPI2=['( B8 - B3 ) / ( B8 - B4 )', 'B8 - B4 != 0'],
-                    NDWI=['(B8-B11)/(B8+B11)', '(B8+B11) != 0'],
-                    LCaroC=['B7 / ( B2-B5 )', '( B7 ) != 0'],
-                    LChloC=['B7 / B5', 'B5 != 0'],
-                    LAnthoC=['B7 / (B3 - B5) ', '( B3-B5 ) !=0'],
-                    Chlogreen=['B8A / (B3 + B5)'],
-                    NDVI=['(B8-B4)/(B8+B4)', '(B8+B4) != 0'],
-                    NDVInarrow=['(B8A-B4)/(B8A+B4)', '(B8A+B4) != 0'],
-                    NDVIre=['(B8A-B5)/(B8A+B5)', '(B8A+B5) != 0'],
-                    RededgePeakArea=['B4+B5+B6+B7+B8A'],
-                    Rratio=['B4/(B2+B3+B4)'],
-                    MTCI=['(B6 - B5)/(B5 - B4)', '(B5-B4) != 0'],
-                    S2REP=['35 * ((((B7 + B4)/2) - B5)/(B6 - B5))'],
-                    IRECI=['(B7-B4)/(B5/B6)', 'np.logical_and(B5 != 0, B6 != 0)'],
-                    NBR=['(B08 - B12) / (B08 + B12)', '(B08+B12)!=0']
-                    )
+            ACORVI=['( B8 - B4 + 0.05 ) / ( B8 + B4 + 0.05 ) ',
+                    '(B8+B4+0.05) != 0'],
+            ACORVInarrow=[
+                '( B8A - B4 + 0.05 ) / ( B8A + B4 + 0.05 ) ',
+                '(B8A+B4+0.05) != 0'],
+            SAVI=['1.5 * (B8 - B4) / ( B8 + B4 + 0.5 )'],
+            EVI=['( 2.5 * ( B8 - B4 ) ) / ( ( B8 + 6 * B4 - 7.5 * B2 ) + 1 )'],
+            EVI2=[
+                '( 2.5 * (B8 - B4) ) / (B8 + 2.4 * B4 + 1) ',
+                'B8+2.4*B4+1 != 0'],
+            PSRI=['( (B4 - B2) / B5 )', 'B5 != 0'],
+            ARI=[
+                '( 1 / B3 ) - ( 1 / B5 )',
+                'np.logical_and(B3 != 0, B5 != 0)'],
+            ARI2=[
+                '( B8 / B2 ) - ( B8 / B3 )',
+                ' np.logical_and(B2 != 0, B3 != 0)'],
+            MARI=['( (B5 - B5 ) - 0.2 * (B5 - B3) ) * (B5 / B4)', 'B4 != 0'],
+            CHLRE=['np.power(B5 / B7,-1.0)', 'B5!=0'],
+            MCARI=[
+                ' ( ( B5 - B4 ) - 0.2 * ( B5 - B3 ) ) * ( B5 / B4 )',
+                'B4 != 0'],
+            MSI=['B11 / B8', 'B8 != 0'],
+            MSIB12=['B12 / B8', 'B8 != 0'],
+            NDrededgeSWIR=['( B6 - B12 ) / ( B6 + B12 )', '( B6 + B12 ) != 0'],
+            SIPI2=['( B8 - B3 ) / ( B8 - B4 )', 'B8 - B4 != 0'],
+            NDWI=['(B8-B11)/(B8+B11)', '(B8+B11) != 0'],
+            LCaroC=['B7 / ( B2-B5 )', '( B7 ) != 0'],
+            LChloC=['B7 / B5', 'B5 != 0'],
+            LAnthoC=['B7 / (B3 - B5) ', '( B3-B5 ) !=0'],
+            Chlogreen=['B8A / (B3 + B5)'],
+            NDVI=['(B8-B4)/(B8+B4)', '(B8+B4) != 0'],
+            NDVInarrow=['(B8A-B4)/(B8A+B4)', '(B8A+B4) != 0'],
+            NDVIre=['(B8A-B5)/(B8A+B5)', '(B8A+B5) != 0'],
+            RededgePeakArea=['B4+B5+B6+B7+B8A'],
+            Rratio=['B4/(B2+B3+B4)'],
+            MTCI=['(B6 - B5)/(B5 - B4)', '(B5-B4) != 0'],
+            S2REP=['35 * ((((B7 + B4)/2) - B5)/(B6 - B5))'],
+            IRECI=['(B7-B4)/(B5/B6)', 'np.logical_and(B5 != 0, B6 != 0)'],
+            NBR=['(B08 - B12) / (B08 + B12)', '(B08+B12)!=0']
+        )
 
         for indice in indices.keys():
             if len(indices[indice]) == 1:
@@ -377,10 +378,10 @@ class Sentinel2(sensorManager):
                     indices[indice][1],
                     compulsory=False)
 
-    def generateTemporalSampling(S2_dir,start_date=False,last_date=False,day_interval=5,save_csv=False):
+    def generateTemporalSampling(S2_dir, start_date=False, last_date=False, day_interval=5, save_csv=False):
         """
         Generate sample time for gap-filling of Time Series
-        
+
         Parameters
         -----------
         S2_dir : str
@@ -398,39 +399,37 @@ class Sentinel2(sensorManager):
         #     List all subfolders which begins with SENTINEL2
         #     if no last_date and start_date given
         # =============================================================================
-        AcquisitionDates = [start_date,last_date]
+        AcquisitionDates = [start_date, last_date]
         if last_date is False or start_date is False:
             S2 = glob.glob(glob.os.path.join(S2_dir, 'SENTINEL2*/'))
-    
+
             # if no folder, looking for zip files
             if S2 == []:
                 S2 = glob.glob(glob.os.path.join(S2_dir, 'SENTINEL2*.zip'))
-    
+
             else:
                 S2 = [glob.os.path.basename(glob.os.path.dirname(S2Folder))
                       for S2Folder in S2]
-    
+
             # ==========================================================================
             #     Detecting YYYYMMDD date format
             # ==========================================================================
-    
+
             import re
             regexYYYYMMDD = r"(?<!\d)(?:(?:20\d{2})(?:(?:(?:0[13578]|1[02])31)|(?:(?:0[1,3-9]|1[0-2])(?:29|30)))|(?:(?:20(?:0[48]|[2468][048]|[13579][26]))0229)|(?:20\d{2})(?:(?:0?[1-9])|(?:1[0-2]))(?:0?[1-9]|1\d|2[0-8]))(?!\d)"
             p = re.compile(regexYYYYMMDD)
-    
-            AcquisitionDates = sorted([p.findall(S2folder)[0] for S2folder in S2])
-    
-    
-        
+
+            AcquisitionDates = sorted(
+                [p.findall(S2folder)[0] for S2folder in S2])
+
         if start_date is False:
             start_date = AcquisitionDates[0]
         if last_date is False:
             last_date = AcquisitionDates[-1]
 
         from museopheno.time_series import generateTemporalSampling
-        
-        return generateTemporalSampling(AcquisitionDates[0],AcquisitionDates[-1],day_interval=day_interval,save_csv=save_csv)
-        
+
+        return generateTemporalSampling(AcquisitionDates[0], AcquisitionDates[-1], day_interval=day_interval, save_csv=save_csv)
 
     def computeSITS(self, S2dir, out_SITS, resample_CSV=False, interpolation='linear', unzip=False,
                     out_cloudMask=False, check_outlier=False, use_flatreflectance=True, n_jobs=1, ram=4000):

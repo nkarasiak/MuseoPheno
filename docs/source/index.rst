@@ -7,18 +7,17 @@ MuseoPheno documentation
    :target: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_256.png
    :alt: MuseoPheno
 
-:Author: `Nicolas Karasiak <http://www.karasiak.net>`_
-:Source code: `github.com project <https://github.com/nkarasiak/MuseoPheno>`_
-:Bug tracker: `github.com issues <https://github.com/nkarasiak/MuseoPheno/issues>`_
-:Generated: |today|
-:License: GPL v3
-:Version: |release|
-
-What is MuseoToolBox ?
------------------------
+.. sidebar:: About MuseoPheno
+        
+    :Author: `Nicolas Karasiak <http://www.karasiak.net>`_
+    :Source code: `github.com project <https://github.com/nkarasiak/MuseoPheno>`_
+    :Bug tracker: `github.com issues <https://github.com/nkarasiak/MuseoPheno/issues>`_
+    :Generated: |today|
+    :License: GPL v3
+    :Version: |release|
     
 .. include:: README.rst
-    :start-line: 0
+    :start-line: 36
 
 .. toctree::
    :maxdepth: 2
