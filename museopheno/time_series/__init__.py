@@ -55,27 +55,39 @@ class smoothSignal:
        2.7735472 ])
         """
         self.band_order = band_order
+        self.order_by = order_by
+        
+        # input dates
         self.init_dates = dates
+        self.init_n_dates = len(dates)
         self.init_datetime = self.convertToDatetime(dates,fmt=fmt)
         self.init_dates_int = self._convertDateToInteger(self.init_datetime,fmt=fmt)
         
+        # output dates
         if output_dates is False:
             output_dates  = dates
         self.output_dates = output_dates
+        self.output_n_dates = len(output_dates)
         self.output_datetime = self.convertToDatetime(output_dates,fmt=fmt)
         self.output_dates_int = self._convertDateToInteger(self.output_datetime,fmt=fmt,start_date=self.init_datetime[0])
     
-    def _getTimeSeriesPositionPerBand(self):
+    def _getTimeSeriesPositionPerBand(self,X):
         """
         Yields the time series for each band (all the blues, all the reds...)
         """
         if self.band_order:
-            if self.order_by == 'date':
-                input_bands_position = 'empty'
-            elif self.order_by == 'band':
-                input_bands_position = 'empty'
-            output_bands_position = False
-            yield input_bands_position,output_bands_position
+            if int(X.shape[1]/self.init_n_dates) != len(self.band_order):
+                raise ValueError('mismatch')
+            for idx_band in range(len(self.band_order)):
+                if self.order_by == 'date':
+                    input_bands_position = [idx_band*self.init_n_dates+d for d in range(self.init_n_dates)]
+                    output_bands_position = [idx_band*self.output_n_dates+d for d in range(self.output_n_dates)]
+                elif self.order_by == 'band':
+                    input_bands_position = [idx_band+len(self.init_dates)*d for d in range(self.init_n_dates)]
+                    output_bands_position = [idx_band+len(self.output_dates)*d for d in range(self.output_n_dates)]
+                print(input_bands_position)
+                print(output_bands_position)
+                yield input_bands_position,output_bands_position
         else:
             input_bands_position = np.arange(len(self.init_dates))
             output_bands_position = np.arange(len(self.output_dates))
@@ -84,7 +96,7 @@ class smoothSignal:
     
     def _resizeIfFlatten(self,X):
         if X.ndim == 1:
-            X = X.reshape(-1,1)    
+            X = X.reshape(1,-1)    
         return X
     
     def _getEmptyOutputArray(self,X):
@@ -92,7 +104,11 @@ class smoothSignal:
         
         """
         X=self._resizeIfFlatten(X)
-        out_x = np.empty((len(self.output_dates),X.shape[1]),X.dtype)
+        if self.band_order:
+            multiply_by = len(self.band_order)
+        else:
+            multiply_by = 1
+        out_x = np.empty((X.shape[0],len(self.output_dates)*multiply_by),X.dtype)
         self._resizeIfFlatten(out_x)
                 
         return out_x
@@ -144,10 +160,13 @@ class smoothSignal:
         ----------
         :class:`scipy.interpolate.interp1d`
         """
-        
-        f = interpolate.interp1d(self.init_dates_int,X,kind=kind,**params)
-            
-        return (f(self.output_dates_int))
+        x = self._getEmptyOutputArray(X)
+        X = self._resizeIfFlatten(X)
+        for in_band,out_band in self._getTimeSeriesPositionPerBand(X):
+            tmp = interpolate.interp1d(self.init_dates_int,X[:,in_band],kind=kind,**params)
+            tmp = self._resizeIfFlatten(tmp(self.output_dates_int))            
+            x[:,out_band] = tmp
+        return (x)
          
     def savitzski_golay(self,X,window_length=3,polyorder=1,interpolation_params={},**params):
         """
@@ -158,8 +177,12 @@ class smoothSignal:
         ----------
         :class:`scipy.signal.savgol_filter`
         """
-        X_linear = self.interpolation(X,**interpolation_params)
-        return signal.savgol_filter(X_linear,window_length,polyorder,**params)
+        x = self._getEmptyOutputArray(X)
+        X = self._resizeIfFlatten(X)
+        for in_band,out_band in self._getTimeSeriesPositionPerBand(X):
+            tmp = interpolate.interp1d(self.init_dates_int,X[:,in_band],**interpolation_params)
+            x[:,out_band] = self._resizeIfFlatten(signal.savgol_filter(tmp(self.output_dates_int),window_length,polyorder,**params))
+        return x
                 
 
 def generateTemporalSampling(start_date, last_date, day_interval=5, save_csv=False, fmt='%Y%m%d'):
