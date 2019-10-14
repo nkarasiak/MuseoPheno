@@ -2,7 +2,7 @@
 [![PyPI version](https://badge.fury.io/py/museopheno.svg)](https://badge.fury.io/py/museopheno)
 [![Build status](https://api.travis-ci.org/nkarasiak/MuseoPheno.svg?branch=master)](https://travis-ci.org/nkarasiak/MuseoPheno)
 [![Downloads](https://pepy.tech/badge/museopheno)](https://pepy.tech/project/museopheno)
-[comment]: <> [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.3404729.svg)](https://doi.org/10.5281/zenodo.3404728)
+
 
 ![MuseoPheno logo](https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png)
 

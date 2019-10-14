@@ -37,9 +37,9 @@ S2 = sensors.Sentinel2(n_bands=10)
 print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
 
 ###########################################################
-# List of available indice : 
+# List of available index : 
 
-print(S2.available_indices.keys())
+print(S2.available_index.keys())
 
 ###########################################################
 # Write metadata in each band (date + band name)
@@ -53,14 +53,14 @@ S2.setDescriptionMetadata(raster,dates)
 ###########################################################
 # Produce NDVI time series from and to a raster
 # ----------------------------------------------
-S2.generateRaster(input_raster=raster,output_raster='/tmp/indice.tif',expression=S2.getIndiceExpression('NDVI'),dtype=np.float32)
+S2.generateRaster(input_raster=raster,output_raster='/tmp/index.tif',expression=S2.getIndexExpression('NDVI'),dtype=np.float32)
 
 ##############################
-# Plot NDVI indice
+# Plot NDVI index
 from museotoolbox.raster_tools import rasterMath
 from matplotlib import pyplot as plt
 
-rM = rasterMath('/tmp/indice.tif')
+rM = rasterMath('/tmp/index.tif')
 NDVI=rM.getRandomBlock() #randomly select a block
 from datetime import datetime
 dateToDatetime = [datetime.strptime(str(date),'%Y%m%d') for date in dates]

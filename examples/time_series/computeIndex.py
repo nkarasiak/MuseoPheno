@@ -1,9 +1,9 @@
 # -*- coding: utf-8 -*-
 """
-Compute a spectral indice or an expression without defining a sensor
+Compute a spectral index or an expression without defining a sensor
 =============================================================================
 
-This example shows how to compute an expression or an indice in a time series (or at one acquisition)
+This example shows how to compute an expression or an index in a time series (or at one acquisition)
 without defining a sensor.
 
 """
@@ -11,7 +11,8 @@ without defining a sensor.
 ##############################################################################
 #   Use sample from Sentinel2 level 3A syntheses (from Theia)
 # --------------------------------------------------------------------
-from museopheno import indices,datasets
+from museopheno.time_series import expressionManager
+from museopheno import datasets
 
 X,dates = datasets.Sentinel2_3a_2018(return_dates=True,get_only_sample=True)
 
@@ -35,7 +36,7 @@ print('Image contains {} dates.'.format(int(X.shape[1]/len(band_order))))
 
 expression = 'B8/(B2+1)'
 
-result = indices.generateIndice(X,band_order=band_order,expression=expression)
+result = expressionManager(X,band_order=band_order,expression=expression)
 
 print(result)
 

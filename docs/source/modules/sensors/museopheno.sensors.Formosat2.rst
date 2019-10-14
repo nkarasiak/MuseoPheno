@@ -14,10 +14,11 @@ Formosat2
       :toctree: Formosat2
    
       ~Formosat2.__init__
-      ~Formosat2.addIndice
-      ~Formosat2.generateIndice
+      ~Formosat2.addIndex
+      ~Formosat2.configureBandsOrder
+      ~Formosat2.generateIndex
       ~Formosat2.generateRaster
-      ~Formosat2.getIndiceExpression
+      ~Formosat2.getIndexExpression
       ~Formosat2.setDescriptionMetadata
    
    

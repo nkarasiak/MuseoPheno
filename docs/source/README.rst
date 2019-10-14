@@ -19,11 +19,6 @@
    :target: https://pepy.tech/project/museopheno
    :alt: Downloads
 
-[comment]: <> 
-.. image:: https://zenodo.org/badge/DOI/10.5281/zenodo.3404729.svg
-   :target: https://doi.org/10.5281/zenodo.3404728
-   :alt: DOI
-
 
 
 .. image:: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png

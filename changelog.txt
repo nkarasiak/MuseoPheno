@@ -2,4 +2,6 @@
 ----
 * Sentinel2 and Formosat2 support for producing indice
 * Metadata generation for raster TimeSeries Manager Qgis plugin
+* Manage timeseries smoothings (interpolation or savitzski golay), including with different bands order by date or by bands
+
 

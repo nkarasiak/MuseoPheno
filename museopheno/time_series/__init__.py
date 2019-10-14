@@ -12,17 +12,204 @@
 # @site:    www.karasiak.net
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
+"""
+The :mod:`museopheno.time_series` module gathers functions to compute expression and 
+smooth time series.
+"""
+
 import numpy as np
 import datetime as dt
 
 from scipy import signal
 from scipy import interpolate
 
+import re
+np.seterr(divide='ignore')
+
+
+def __convertBandToArrayIdx(X, expression, n_comp,
+                            date, band_order, condition=False, order_by='date', nodata=-9999):
+    X = np.copy(X)
+#    bandsToChange = re.findall('B[0-9]*',str(expression))
+    bandsToChange = re.findall('B[0-9]*[A-Z]*', str(expression))
+    out = np.zeros(X[:, 0].shape)
+    out[:] = nodata
+
+    for band in set(bandsToChange):  # set to order band
+        originalBand = band[1:]  # to remove B
+        while originalBand[0] == '0':
+            originalBand = originalBand[1:]
+        bandIdx = np.where(np.in1d(band_order, originalBand) == True)[0]
+
+        if order_by == 'date':
+            newBand = n_comp * date + bandIdx
+        elif order_by == 'band':
+            newBand = bandIdx*date+n_comp
+
+        if condition:
+            condition = condition.replace(band, "X[:,{}]".format(newBand))
+        expression = expression.replace(band, "X[:,{}]" .format(newBand))
+
+    if condition:
+        TF = eval(condition).flatten()
+        out[TF] = eval(expression)[TF].flatten()
+    else:
+        out = eval(expression)
+    return out.flatten()
+
+
+def _areBandsAvailables(band_order, expression, compulsory=True):
+    """
+    Check if band needed for expression are available
+
+    Parameters
+    -----------
+    band_order : list
+        list of bands (e.g. ['2','3','4','8'])
+    expression : str
+        expression (e.g. 'B08/B02*100')
+
+    Examples
+    ---------
+    >>> _areBandsAvailables(['2','3','4','8'],'B08/B02*100')
+    True
+    >>> _areBandsAvailables(['2','3','4','8'],'B8A/B04*100')
+    ValueError: Band ['B8A'] is missing.
+    """
+    bandsToChange = re.findall('B[0-9]*[A-Z]*', str(expression))
+    band_order_withoutB = []
+    for b in band_order:
+        if b.capitalize().startswith('B'):
+            b = b[1:]
+        while b[0] == '0':
+            b = b[1:]
+        band_order_withoutB.append(str(b).capitalize())
+
+    missing_bands = []
+
+    for band in bandsToChange:
+        band_withoutBand0 = band[1:]
+        while str(band_withoutBand0).find('0') == 0:
+            band_withoutBand0 = band_withoutBand0[1:]
+
+        if str(band_withoutBand0).capitalize() in band_order_withoutB:
+            pass
+        else:
+            missing_bands.append(band)
+    if len(missing_bands) > 0:
+        if compulsory:
+            if len(missing_bands) > 1:
+                verb, s = ['are', 's']
+            else:
+                verb, s = ['is', '']
+            raise ValueError(
+                'Band{} {} {} missing.'.format(
+                    s, missing_bands, verb))
+        else:
+            return False
+    else:
+        return True
+
+
+def expressionManager(X, band_order, expression, interpolate_nan=True,
+                      divide_X_by=1, multiply_by=1, order_by='date', dtype=np.float32):
+    """
+    Generate expression/index from an array according to a band_order, and expression.
+
+    The easiest way to use it is to choose a sensor from :class:`museopheno.sensors`.
+
+    Parameters
+    ----------
+    X : array.
+        array where each line is a pixel.
+    band_order : list
+        list of band order (e.g. ['2','3','4','8'])
+    expression : str or dict.
+        If str, contains only the expression (e.g. 'B8/B2')
+        If dict, contains a expression key and can contain a condition key.
+        See `museopheno.sensors.sensorManager.addIndice` function.
+    inteprolate_nan : boolean, default True, optional.
+        If nan value a linear interpolation is done.
+    divide_X_by : integer or float, default 1, optional.
+        Value to divide X before computing the indice
+    multiply_by : integer or float, default 1, optional.
+        Value to multiply the result (e.g. 100 to set the NDVI between -100 and 100)
+    order_by : str, default 'date', optional.
+        if 'date', means your raster is stacked in this way : B1, B2 to Bx for the first date, then B1,B2 to Bx for the second date...
+        if 'band', means your raster is stacked in this way : B1 first date, B1 second date... to B1 last date, then B2 first date...
+    dtype : numpy dtype, default np.float32, optional.
+        dtype of the output (e.g. np.int16 to store the NDVI in integer value)
+
+    Example
+    --------
+    >>> from museopheno import datasets, expressionManager
+    >>> X = datasets.Sentinel2_3a_2018(get_only_sample=True)
+    >>> indices.generateIndice(X,band_order=['2','3','4','8','5','6','7','8A','11','12'],expression='B4/B8')
+
+
+    """
+
+    def __nan_helper(y):
+        return np.isnan(y), lambda z: z.nonzero()[0]
+
+    if X.ndim == 1:
+        X = X.reshape(1, -1)
+    X = X / divide_X_by
+
+    nDates = X.shape[1] / len(band_order)
+    if nDates != int(X.shape[1] / len(band_order)):
+        raise ValueError(
+            'band_order is not a multiple of the number of columns of your array which contains {} bands.'.format(
+                X.shape[1]))
+    else:
+        n_comp = int(X.shape[1] / nDates)
+        nDates = int(nDates)
+
+    outIndice = np.zeros((X.shape[0], nDates), dtype=np.float64)
+
+    if _areBandsAvailables(band_order, expression):
+        for date in range(nDates):
+            if isinstance(expression, str):
+                mathExp = expression
+                condition = False
+            else:
+                mathExp = expression['expression']
+                if 'condition' in expression.keys():
+                    condition = expression['condition']
+                else:
+                    condition = False
+            dateIndice = __convertBandToArrayIdx(
+                X, mathExp, n_comp, date, band_order, condition=condition, order_by=order_by)
+            outIndice[:, date] = dateIndice
+
+        if interpolate_nan:
+            outIndice = np.where(
+                np.logical_or(
+                    outIndice == np.inf,
+                    outIndice == -
+                    np.inf),
+                np.nan,
+                outIndice)
+
+            for i in range(outIndice.shape[0]):
+                nans, x = __nan_helper(outIndice[i, :])
+                if not np.all(nans == False):
+                    outIndice[i, nans] = np.interp(
+                        x(nans), x(~nans), outIndice[i, ~nans])
+        if multiply_by != 1:
+            outIndice *= multiply_by
+
+        if dtype:
+            outIndice = outIndice.astype(dtype)
+
+        return outIndice
+
+
 class smoothSignal:
-    def __init__(self,dates,band_order=False,order_by='date',output_dates=False,fmt='%Y%m%d'):
+    def __init__(self, dates, band_order=False, order_by='date', output_dates=False, fmt='%Y%m%d'):
         """
         Smooth time series signal.
-        
+
         Parameters
         -----------
         dates : list
@@ -34,7 +221,7 @@ class smoothSignal:
         output_dates
         fmt : str, optional.
             Input format of dates. Default is '%Y%m%d', so '20181231'
-            
+
         Example
         --------
         >>> x = np.asarray([3.4825737, 4.27786  , 5.0373, 4.7196426, 4.1233397, 4.0338645,2.7735472])
@@ -43,95 +230,97 @@ class smoothSignal:
         >>> timeseries = smoothSignal(dates=y,output_dates=new_dates)
         >>> timeseries.interpolation(x,kind='cubic')
         array([3.4825737 , 4.08649468, 4.516693  , 4.80103881, 4.96740226,
-       5.0436535 , 5.0576627 , 5.0373    , 5.00281393, 4.94396649,
-       4.84289809, 4.68186017, 4.46665263, 4.25561504, 4.11417114,
-       4.07489294, 4.07273781, 4.02461571, 3.84743661, 3.45811045,
-       2.7735472 ])
+           5.0436535 , 5.0576627 , 5.0373    , 5.00281393, 4.94396649,
+           4.84289809, 4.68186017, 4.46665263, 4.25561504, 4.11417114,
+           4.07489294, 4.07273781, 4.02461571, 3.84743661, 3.45811045,
+           2.7735472 ])
         >>> timeseries.savitzski_golay(x)
         array([3.52581844, 3.96414587, 4.30156892, 4.49484286, 4.63045714,
-       4.76607143, 4.90168571, 4.96423055, 4.95370595, 4.87011189,
-       4.77926706, 4.65216832, 4.48881567, 4.30187759, 4.16911641,
-       4.09053213, 4.04814943, 3.88019043, 3.58665514, 3.18010117,
-       2.7735472 ])
+           4.76607143, 4.90168571, 4.96423055, 4.95370595, 4.87011189,
+           4.77926706, 4.65216832, 4.48881567, 4.30187759, 4.16911641,
+           4.09053213, 4.04814943, 3.88019043, 3.58665514, 3.18010117,
+           2.7735472 ])
         """
         self.band_order = band_order
         self.order_by = order_by
-        
+
         # input dates
         self.init_dates = dates
         self.init_n_dates = len(dates)
-        self.init_datetime = self.convertToDatetime(dates,fmt=fmt)
-        self.init_dates_int = self._convertDateToInteger(self.init_datetime,fmt=fmt)
-        
+        self.init_datetime = self.convertToDatetime(dates, fmt=fmt)
+        self.init_dates_int = self._convertDateToInteger(
+            self.init_datetime, fmt=fmt)
+
         # output dates
         if output_dates is False:
-            output_dates  = dates
+            output_dates = dates
         self.output_dates = output_dates
         self.output_n_dates = len(output_dates)
-        self.output_datetime = self.convertToDatetime(output_dates,fmt=fmt)
-        self.output_dates_int = self._convertDateToInteger(self.output_datetime,fmt=fmt,start_date=self.init_datetime[0])
-    
-    def _getTimeSeriesPositionPerBand(self,X):
+        self.output_datetime = self.convertToDatetime(output_dates, fmt=fmt)
+        self.output_dates_int = self._convertDateToInteger(
+            self.output_datetime, fmt=fmt, start_date=self.init_datetime[0])
+
+    def _getTimeSeriesPositionPerBand(self, X):
         """
-        Yields the time series for each band (all the blues, all the reds...)
+        Yields the time series for each band (all the B2, all the B8...)
         """
         if self.band_order:
             if int(X.shape[1]/self.init_n_dates) != len(self.band_order):
                 raise ValueError('mismatch')
             for idx_band in range(len(self.band_order)):
                 if self.order_by == 'date':
-                    input_bands_position = [idx_band*self.init_n_dates+d for d in range(self.init_n_dates)]
-                    output_bands_position = [idx_band*self.output_n_dates+d for d in range(self.output_n_dates)]
+                    input_bands_position = [
+                        idx_band*self.init_n_dates+d for d in range(self.init_n_dates)]
+                    output_bands_position = [
+                        idx_band*self.output_n_dates+d for d in range(self.output_n_dates)]
                 elif self.order_by == 'band':
-                    input_bands_position = [idx_band+len(self.init_dates)*d for d in range(self.init_n_dates)]
-                    output_bands_position = [idx_band+len(self.output_dates)*d for d in range(self.output_n_dates)]
-                print(input_bands_position)
-                print(output_bands_position)
-                yield input_bands_position,output_bands_position
+                    input_bands_position = [
+                        idx_band+len(self.init_dates)*d for d in range(self.init_n_dates)]
+                    output_bands_position = [
+                        idx_band+len(self.output_dates)*d for d in range(self.output_n_dates)]
+                yield input_bands_position, output_bands_position
         else:
             input_bands_position = np.arange(len(self.init_dates))
             output_bands_position = np.arange(len(self.output_dates))
-            
-            yield input_bands_position,output_bands_position
-    
-    def _resizeIfFlatten(self,X):
+
+            yield input_bands_position, output_bands_position
+
+    def _resizeIfFlatten(self, X):
         if X.ndim == 1:
-            X = X.reshape(1,-1)    
+            X = X.reshape(1, -1)
         return X
-    
-    def _getEmptyOutputArray(self,X):
-        """
-        
-        """
-        X=self._resizeIfFlatten(X)
+
+    def _getEmptyOutputArray(self, X):
+        X = self._resizeIfFlatten(X)
         if self.band_order:
             multiply_by = len(self.band_order)
         else:
             multiply_by = 1
-        out_x = np.empty((X.shape[0],len(self.output_dates)*multiply_by),X.dtype)
+        out_x = np.empty(
+            (X.shape[0], len(self.output_dates)*multiply_by), X.dtype)
         self._resizeIfFlatten(out_x)
-                
+
         return out_x
-            
-    def _convertDateToInteger(self,dates,fmt='%Y%m%d',convert_to_datetime=False,start_date=False):
+
+    def _convertDateToInteger(self, dates, fmt='%Y%m%d', convert_to_datetime=False, start_date=False):
         if convert_to_datetime:
-            dates = self.convertToDateTime(dates,fmt)
-            
-        if start_date :
+            dates = self.convertToDateTime(dates, fmt)
+
+        if start_date:
             if convert_to_datetime:
-                day0 = dt.datetime.strptime(str(start_date),fmt=fmt)
+                day0 = dt.datetime.strptime(str(start_date), fmt=fmt)
             else:
                 day0 = start_date
         else:
             day0 = dates[0]
-        dates_start_at_zero  = [[date-day0][0].days for date in dates]
-        
+        dates_start_at_zero = [[date-day0][0].days for date in dates]
+
         return dates_start_at_zero
-    
-    def convertToDatetime(self,dates,fmt='%Y%m%d'):
+
+    def convertToDatetime(self, dates, fmt='%Y%m%d'):
         """
         Convert list of dates to a list of dates with datetime type.
-        
+
         Parameters
         -----------
         dates : list
@@ -139,51 +328,54 @@ class smoothSignal:
         fmt : str
             Format type of each date
         """
-        return [dt.datetime.strptime(str(date),fmt) for date in dates]        
+        return [dt.datetime.strptime(str(date), fmt) for date in dates]
 
-    def whiitaker(self,X):
+    def whiitaker(self, X):
         print('TODO')
-         
-    def interpolation(self,X,kind='linear',**params):
+
+    def interpolation(self, X, kind='linear', **params):
         """
         Based on :class:`scipy.interpolate.interp1d`
-        
-        
+
+
         Parameters
         -----------
         X : array_like
             A N-D array of real values. The length of y along the interpolation axis must be equal to the length of dates.
         kind : str, default 'linear'
             Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
-        
+
         References
         ----------
         :class:`scipy.interpolate.interp1d`
         """
         x = self._getEmptyOutputArray(X)
         X = self._resizeIfFlatten(X)
-        for in_band,out_band in self._getTimeSeriesPositionPerBand(X):
-            tmp = interpolate.interp1d(self.init_dates_int,X[:,in_band],kind=kind,**params)
-            tmp = self._resizeIfFlatten(tmp(self.output_dates_int))            
-            x[:,out_band] = tmp
+        for in_band, out_band in self._getTimeSeriesPositionPerBand(X):
+            tmp = interpolate.interp1d(
+                self.init_dates_int, X[:, in_band], kind=kind, **params)
+            tmp = self._resizeIfFlatten(tmp(self.output_dates_int))
+            x[:, out_band] = tmp
         return (x)
-         
-    def savitzski_golay(self,X,window_length=3,polyorder=1,interpolation_params={},**params):
+
+    def savitzski_golay(self, X, window_length=3, polyorder=1, interpolation_params={}, **params):
         """
         Savitzski golay 
         Based on :class:`scipy.signal.savgol_filter`
-        
+
         References
         ----------
         :class:`scipy.signal.savgol_filter`
         """
         x = self._getEmptyOutputArray(X)
         X = self._resizeIfFlatten(X)
-        for in_band,out_band in self._getTimeSeriesPositionPerBand(X):
-            tmp = interpolate.interp1d(self.init_dates_int,X[:,in_band],**interpolation_params)
-            x[:,out_band] = self._resizeIfFlatten(signal.savgol_filter(tmp(self.output_dates_int),window_length,polyorder,**params))
+        for in_band, out_band in self._getTimeSeriesPositionPerBand(X):
+            tmp = interpolate.interp1d(
+                self.init_dates_int, X[:, in_band], **interpolation_params)
+            x[:, out_band] = self._resizeIfFlatten(signal.savgol_filter(
+                tmp(self.output_dates_int), window_length, polyorder, **params))
         return x
-                
+
 
 def generateTemporalSampling(start_date, last_date, day_interval=5, save_csv=False, fmt='%Y%m%d'):
     """

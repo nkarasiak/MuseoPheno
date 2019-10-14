@@ -12,16 +12,20 @@
 # @site:    www.karasiak.net
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
+"""
+The :mod:`museopheno.sensors` module gathers sensors to ease index and time series computation.
+`MuseoPheno`.
+"""
 import glob
 import numpy as np
 import gdal
-from .. import indices
 from museotoolbox.raster_tools import rasterMath as _rasterMath
+from ..time_series import _areBandsAvailables, expressionManager
 
 
 class sensorManager:
     """
-    Manage sensor in order to produce temporal indices and metadata.
+    Manage sensor in order to produce temporal index and metadata.
 
     Parameters
     -----------
@@ -37,7 +41,7 @@ class sensorManager:
     Example
     --------
     >>> modis = sensorManager(band_order=['1','2'],wavelengths=['620-670','841-876'])
-    >>> modis.addIndice('FirstBandRatio',expression='B1/(B1+B2)',condition='(B1+B2)!=0')
+    >>> modis.addIndex('FirstBandRatio',expression='B1/(B1+B2)',condition='(B1+B2)!=0')
     """
 
     def __init__(self, band_order,
@@ -46,7 +50,7 @@ class sensorManager:
         self.band_order = band_order
         self.n_bands = len(self.band_order)
         self.wavelengths = wavelengths
-        self.available_indices = dict()
+        self.available_index = dict()
 
         self.configureBandsOrder()  # useless for now
 
@@ -66,68 +70,69 @@ class sensorManager:
 
         self.order_by = order_by
 
-    def __checkIndiceExist(self, indice_name):
-        if indice_name not in self.available_indices.keys():
+    def __checkIndexExist(self, index_name):
+        if index_name not in self.available_index.keys():
             raise ValueError(
-                str(indice_name) +
-                ' is not an available indice. Please select one of them : ' +
+                str(index_name) +
+                ' is not an available index. Please select one of them : ' +
                 ', '.join(
-                    self.available_indices.keys()))
+                    self.available_index.keys()))
         else:
             return True
 
-    def getIndiceExpression(self, indice_name):
+    def getIndexExpression(self, index_name):
         """
-        Return indice expression
+        Return index expression
 
         Parameters
         -----------
-        indice_name : str, mandatory
+        index_name : str, mandatory
 
         Example
         --------
-        >>> getIndiceExpression('NDVI')
+        >>> getIndexExpression('NDVI')
         {'expression': '(B8-B4)/(B8+B4)', 'condition': '(B8+B4) != 0'}
         """
-        if self.__checkIndiceExist(indice_name):
-            return self.available_indices[indice_name]
+        if self.__checkIndexExist(index_name):
+            return self.available_index[index_name]
 
-    def addIndice(self, indice_name, expression,
-                  condition=False, compulsory=True):
+    def addIndex(self, index_name, expression,
+                 condition=False, compulsory=True):
         """
-        Add indice for the current sensor, verify if band is available before adding the script.
+        Add index for the current sensor, verify if band is available before adding the script.
+
         Parameters
         -----------
-        indice_name : str
-            name of the indice
+        index_name : str
+            name of the index
         expression : str
             When calling a band, start with B (e.g. 'B8/B3+0.5')
         condition : str
-            Condition to respect when computing the indice (e.g. 'B3!=0')
+            Condition to respect when computing the index (e.g. 'B3!=0')
         compulsory : boolean, default True.
             If compulsory, will return an error if band is not available with the current sensor.
 
         Example
         --------
-        >>> addIndice('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
-        >>> dataset.getIndiceExpression('NBR')
+        >>> addIndex('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
+        >>> dataset.getIndexExpression('NBR')
         {'expression': '(B08 - B12) / (B08 + B12)', 'condition': '(B08+B12)!=0'}
         """
-        if indices.areBandsAvailables(
+        if _areBandsAvailables(
                 self.band_order, expression, compulsory=compulsory):
-            self.available_indices[indice_name] = dict(expression=expression)
+            self.available_index[index_name] = dict(expression=expression)
             if condition:
-                self.available_indices[indice_name]['condition'] = condition
+                self.available_index[index_name]['condition'] = condition
 
-    def _addEachBandAsIndice(self):
+    def _addEachBandAsIndex(self):
         for band in self.band_order:
-            self.available_indices['B' +
-                                   str(band)] = dict(expression='B' + str(band))
+            self.available_index['B' +
+                                 str(band)] = dict(expression='B' + str(band))
 
-    def generateIndice(self, X, expression, interpolate_nan=True,
-                       divide_X_by=1, multiply_by=1, dtype=np.float32):
+    def generateIndex(self, X, expression, interpolate_nan=True,
+                      divide_X_by=1, multiply_by=1, dtype=np.float32):
         """
-        Generate indice from array
+        Generate index from array
 
         Parameters
         -----------
@@ -135,11 +140,11 @@ class sensorManager:
             array where each line is a pixel.
         expression : str or dict
             If str, contains only the expression (e.g. 'B8/B2')
-            If dict, please generate it from addIndice function.
+            If dict, please generate it from addIndex function.
         inteprolate_nan : boolean, default True
             If nan value a linear interpolation is done.
         divide_X_by : integer or float, default 1
-            Value to divide X before computing the indice
+            Value to divide X before computing the index
         multiply_by : integer or float, default 1.
             Value to multiply the result (e.g. 100 to set the NDVI between -100 and 100)
         dtype : numpy dtype, default np.float32
@@ -147,9 +152,9 @@ class sensorManager:
 
         Example
         --------
-        >>> generateIndice(X,expression='B8/B2')
+        >>> generateIndex(X,expression='B8/B2')
         """
-        X_ = indices.generateIndice(
+        X_ = expressionManager(
             X,
             self.band_order,
             expression=expression,
@@ -162,21 +167,21 @@ class sensorManager:
     def generateRaster(self, input_raster, output_raster, expression,
                        interpolate_nan=True, divide_X_by=1, multiply_by=1, dtype=np.float32):
         """
-        Generate indice from raster
+        Generate index from raster
 
         Parameters
         -----------
         intput_raster : path
             path of the raster file.
         output_raster : path
-            path to save the raster file. (e.g. '/tmp/myIndice.tif')
+            path to save the raster file. (e.g. '/tmp/myIndex.tif')
         expression : str or dict
             If str, contains only the expression (e.g. 'B8/B2')
-            If dict, please generate it from addIndice function.
+            If dict, please generate it from addIndex function.
         inteprolate_nan : boolean, default True
             If nan value a linear interpolation is done.
         divide_X_by : integer or float, default 1
-            Value to divide X before computing the indice
+            Value to divide X before computing the index
         multiply_by : integer or float, default 1.
             Value to multiply the result (e.g. 100 to set the NDVI between -100 and 100)
         dtype : numpy dtype, default np.float32
@@ -184,11 +189,11 @@ class sensorManager:
 
         Example
         --------
-        >>> generateRaster(raster,'/tmp/myIndice.tif',expression='B8/B2')
+        >>> generateRaster(raster,'/tmp/myIndex.tif',expression='B8/B2')
         """
-        rM = _rasterMath(input_raster, message='Computing indice')
+        rM = _rasterMath(input_raster, message='Computing index')
         rM.addFunction(
-            indices.generateIndice,
+            expressionManager,
             output_raster,
             outNumpyDT=dtype,
             band_order=self.band_order,
@@ -291,7 +296,7 @@ class Sentinel2(sensorManager):
      'Vegetation Red Edge 4',
      'SWIR1',
      'SWIR2']
-    >>> dataset.getIndiceExpression('NDVI')
+    >>> dataset.getIndexExpression('NDVI')
     {'expression': '(B8-B4)/(B8+B4)', 'condition': '(B8+B4) != 0'}
     """
 
@@ -325,7 +330,7 @@ class Sentinel2(sensorManager):
                           'SWIR1',
                           'SWIR2'][:self.n_bands]
 
-        indices = dict(
+        index = dict(
             ACORVI=['( B8 - B4 + 0.05 ) / ( B8 + B4 + 0.05 ) ',
                     '(B8+B4+0.05) != 0'],
             ACORVInarrow=[
@@ -368,14 +373,14 @@ class Sentinel2(sensorManager):
             NBR=['(B08 - B12) / (B08 + B12)', '(B08+B12)!=0']
         )
 
-        for indice in indices.keys():
-            if len(indices[indice]) == 1:
-                self.addIndice(indice, indices[indice], compulsory=False)
+        for idx in index.keys():
+            if len(index[idx]) == 1:
+                self.addIndex(idx, index[idx], compulsory=False)
             else:
-                self.addIndice(
-                    indice,
-                    indices[indice][0],
-                    indices[indice][1],
+                self.addIndex(
+                    idx,
+                    index[idx][0],
+                    index[idx][1],
                     compulsory=False)
 
     def generateTemporalSampling(S2_dir, start_date=False, last_date=False, day_interval=5, save_csv=False):
@@ -516,7 +521,7 @@ class Formosat2(sensorManager):
      'Vegetation Red Edge 4',
      'SWIR1',
      'SWIR2']
-    >>> dataset.getIndiceExpression('NDVI')
+    >>> dataset.getIndexExpression('NDVI')
     {'expression': '(B8-B4)/(B8+B4)', 'condition': '(B8+B4) != 0'}
     >>>
     """
@@ -539,23 +544,23 @@ class Formosat2(sensorManager):
         else:
             super().__init__('FormoSat2', n_bands, band_order)
 
-        indices = dict(ACORVI=['( B4 - B3 + 0.05 ) / ( B4 + B3 + 0.05 ) ', '(B4+B3+0.05) != 0'],
-                       SAVI=['1.5 * (B4 - B3) / ( B4 + B3 + 0.5 )'],
-                       EVI=[
-                           '( 2.5 * ( B4 - B3 ) ) / ( ( B4 + 6 * B3 - 7.5 * B1 ) + 1 )'],
-                       EVI2=['( 2.5 * (B4 - B3) ) / (B4 + 2.4 * B3 + 1) ',
-                             'B4+2.4*B3+1 != 0'],
-                       ARI2=['( B4 / B1 ) - ( B4 / B2 )',
-                             ' np.logical_and(B1 != 0, B2 != 0)'],
-                       NDVI=['(B4-B3)/(B4+B3)', '(B4+B3) != 0'],
-                       Rratio=['B3/(B1+B2+B3)'])
+        index = dict(ACORVI=['( B4 - B3 + 0.05 ) / ( B4 + B3 + 0.05 ) ', '(B4+B3+0.05) != 0'],
+                     SAVI=['1.5 * (B4 - B3) / ( B4 + B3 + 0.5 )'],
+                     EVI=[
+            '( 2.5 * ( B4 - B3 ) ) / ( ( B4 + 6 * B3 - 7.5 * B1 ) + 1 )'],
+            EVI2=['( 2.5 * (B4 - B3) ) / (B4 + 2.4 * B3 + 1) ',
+                  'B4+2.4*B3+1 != 0'],
+            ARI2=['( B4 / B1 ) - ( B4 / B2 )',
+                  ' np.logical_and(B1 != 0, B2 != 0)'],
+            NDVI=['(B4-B3)/(B4+B3)', '(B4+B3) != 0'],
+            Rratio=['B3/(B1+B2+B3)'])
 
-        for indice in indices.keys():
-            if len(indices[indice]) == 1:
-                self.addIndice(indice, indices[indice], compulsory=False)
+        for idx in index.keys():
+            if len(index[idx]) == 1:
+                self.addIndex(idx, index[idx], compulsory=False)
             else:
-                self.addIndice(
-                    indice,
-                    indices[indice][0],
-                    indices[indice][1],
+                self.addIndex(
+                    idx,
+                    index[idx][0],
+                    index[idx][1],
                     compulsory=False)

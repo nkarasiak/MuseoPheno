@@ -13,10 +13,10 @@
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
 """
-Produce a new raster with indices stacked in new bands
+Produce a new raster with index stacked in new bands
 =============================================================================
 
-This example shows how to add to a raster spectral indices.
+This example shows how to add to a raster spectral index.
 Here we add LChloC and ACORVI (a modified NDVI).
 
 """
@@ -40,17 +40,17 @@ S2 = sensors.Sentinel2(n_bands=10)
 print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
 
 ###############################
-# List of available indice : 
+# List of available index : 
 
-S2.available_indices.keys()
+S2.available_index.keys()
 
 ##############################################
 # Define a custom function
 # ---------------------------------------
 
-def createSITSplusIndices(X):
-    X1 = S2.generateIndice(X,S2.getIndiceExpression('LChloC'),multiply_by=100,dtype=np.int16)
-    X2 = S2.generateIndice(X,S2.getIndiceExpression('ACORVI'),multiply_by=100,dtype=np.int16)
+def createSITSplusIndex(X):
+    X1 = S2.generateIndex(X,S2.getIndexExpression('LChloC'),multiply_by=100,dtype=np.int16)
+    X2 = S2.generateIndex(X,S2.getIndexExpression('ACORVI'),multiply_by=100,dtype=np.int16)
     
     return np.hstack((X,X1,X2)).astype(np.int16)
 
@@ -65,12 +65,12 @@ print('Block has {} pixels and {} bands'.format(X.shape[0],X.shape[1]))
 ################################
 # Now we can try our function
 
-XwithIndices = createSITSplusIndices(X)
-print('Raster+indice produced has {} pixels and {} bands'.format(XwithIndices.shape[0],XwithIndices.shape[1]))
+XwithIndex = createSITSplusIndex(X)
+print('Raster+index produced has {} pixels and {} bands'.format(XwithIndex.shape[0],XwithIndex.shape[1]))
 
 ##################################
 # Now we add our function as the test was a success
-rM.addFunction(createSITSplusIndices,'/tmp/SITSwithIndices.tif')
+rM.addFunction(createSITSplusIndex,'/tmp/SITSwithIndex.tif')
 
 ########################
 # Produce raster
@@ -80,6 +80,6 @@ rM.run()
 ##################
 # Plot image
 from matplotlib import pyplot as plt
-rM = rasterMath('/tmp/SITSwithIndices.tif')
+rM = rasterMath('/tmp/SITSwithIndex.tif')
 X=rM.getRandomBlock() #randomly select a block
 plt.plot(X[:20,:].T)

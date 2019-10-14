@@ -12,6 +12,8 @@
 # @site:    www.karasiak.net
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
-__version__ = "0.1"
+"""
+The :mod:`museopheno.expression_manager` module gathers functions to compute an 
+expression in time series.
+"""
 
-from museopheno import datasets, sensors, time_series

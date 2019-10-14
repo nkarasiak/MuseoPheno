@@ -14,10 +14,11 @@ sensorManager
       :toctree: sensorManager
    
       ~sensorManager.__init__
-      ~sensorManager.addIndice
-      ~sensorManager.generateIndice
+      ~sensorManager.addIndex
+      ~sensorManager.configureBandsOrder
+      ~sensorManager.generateIndex
       ~sensorManager.generateRaster
-      ~sensorManager.getIndiceExpression
+      ~sensorManager.getIndexExpression
       ~sensorManager.setDescriptionMetadata
    
    

@@ -13,11 +13,11 @@
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
 """
-Add or modify an spectral indice of a sensor
+Add or modify an spectral index of a sensor
 =============================================================================
 
-This example shows how to add or modify an indice for a specific sensor.
-Here we add/modify the NBR indice (Normalized Burn-Ratio), then we generate a raster.
+This example shows how to add or modify an index for a specific sensor.
+Here we add/modify the NBR index (Normalized Burn-Ratio), then we generate a raster.
 """
 
 ####################################"
@@ -37,31 +37,31 @@ S2 = sensors.Sentinel2(n_bands=10)
 print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
 
 ################################
-# Look at available S2 indices
-S2.available_indices
+# Look at available S2 index
+S2.available_index
 
 #################################
-# add the NBR indice
+# add the NBR index
 # ------------------------
 
 #######################################
-# This indice is already in MuseoPheno, but if you change the expression it will overwrite the previous one
+# This index is already in MuseoPheno, but if you change the expression it will overwrite the previous one
 
-S2.addIndice('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
+S2.addIndex('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
 
 ################################
 # compute NBR from an array
 # -----------------------------------
-NBR = S2.generateIndice(X,S2.getIndiceExpression('NBR'))
+NBR = S2.generateIndex(X,S2.getIndexExpression('NBR'))
 
 #############################
-# Produce the indice raster
+# Produce the index raster
 # ---------------------------
 
 # We multiply by 100 to save with int16 datatype
 
 raster = datasets.Sentinel2_3a_2018()
-S2.generateRaster(raster,output_raster='/tmp/NBR.tif',expression=S2.getIndiceExpression('NBR'),multiply_by=100,dtype=np.int16)
+S2.generateRaster(raster,output_raster='/tmp/NBR.tif',expression=S2.getIndexExpression('NBR'),multiply_by=100,dtype=np.int16)
 
 ###################
 # plot result

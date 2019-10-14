@@ -13,10 +13,10 @@
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
 """
-Compute a spectral indice from S2 Time Series
+Compute a spectral index from S2 Time Series
 =============================================================================
 
-This example shows how to compute an indice (here LChloC) from a S2 with 10 bands.
+This example shows how to compute an index (here LChloC) from a S2 with 10 bands.
 The raster is order date per date (blue,green,red...date 1 then blue,green,red... date 2...)
 """
 
@@ -41,8 +41,8 @@ S2 = sensors.Sentinel2(n_bands=10)
 # check default band_order
 print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
 
-# List of available indice : 
-S2.available_indices.keys()
+# List of available index : 
+S2.available_index.keys()
 
 ###########################################################
 # Write metadata in each band (date + band name)
@@ -51,21 +51,21 @@ S2.available_indices.keys()
 S2.setDescriptionMetadata(raster,dates)
 
 ###########################################################
-# Generate a raster with LChloC indice
+# Generate a raster with LChloC index
 # ---------------------------------------------
 
-# show expression and condition of LChloC indice
-print(S2.getIndiceExpression('LChloC'))
+# show expression and condition of LChloC index
+print(S2.getIndexExpression('LChloC'))
 
 # generate raster
-S2.generateRaster(input_raster=raster,output_raster='/tmp/S2.tif',expression=S2.getIndiceExpression('LChloC'),dtype=np.float32)
+S2.generateRaster(input_raster=raster,output_raster='/tmp/S2.tif',expression=S2.getIndexExpression('LChloC'),dtype=np.float32)
 
 ######################################"
 # Plot image
 
 rM = rasterMath(raster)
 X=rM.getRandomBlock()
-NDVI = S2.generateIndice(X,S2.getIndiceExpression('LChloC'),dtype=np.float32)
+NDVI = S2.generateIndex(X,S2.getIndexExpression('LChloC'),dtype=np.float32)
 
 from matplotlib import pyplot as plt
 from datetime import datetime

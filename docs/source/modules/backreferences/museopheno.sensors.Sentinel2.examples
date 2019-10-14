@@ -23,7 +23,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here LChloC) from a S2 with 10 bands. The raster i...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an index (here LChloC) from a S2 with 10 bands. The raster is...">
 
 .. only:: html
 
@@ -41,13 +41,13 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add or modify an indice for a specific sensor. Here we add/modify the...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add or modify an index for a specific sensor. Here we add/modify the ...">
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndiceToSensor_thumb.png
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndexToSensor_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_addIndiceToSensor.py`
+        :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
 
 .. raw:: html
 
@@ -55,11 +55,11 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_addIndiceToSensor.py`
+    * :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here NDVI) from a S2 with 10 bands. The raster is ...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an index (here NDVI) from a S2 with 10 bands. The raster is o...">
 
 .. only:: html
 
@@ -77,7 +77,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an indice (here LChloC) from a S2 with 10 bands. The raster i...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to compute an index (here LChloC) from a S2 with 10 bands. The raster is...">
 
 .. only:: html
 
@@ -95,13 +95,13 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add to a raster spectral indices. Here we add LChloC and ACORVI (a mo...">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to add to a raster spectral index. Here we add LChloC and ACORVI (a modi...">
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndicestoRaster_thumb.png
+    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndextoRaster_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_addIndicestoRaster.py`
+        :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
 
 .. raw:: html
 
@@ -109,7 +109,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_addIndicestoRaster.py`
+    * :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
 
 .. raw:: html
 

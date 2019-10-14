@@ -14,12 +14,13 @@ Sentinel2
       :toctree: Sentinel2
    
       ~Sentinel2.__init__
-      ~Sentinel2.addIndice
+      ~Sentinel2.addIndex
       ~Sentinel2.computeSITS
-      ~Sentinel2.generateIndice
+      ~Sentinel2.configureBandsOrder
+      ~Sentinel2.generateIndex
       ~Sentinel2.generateRaster
       ~Sentinel2.generateTemporalSampling
-      ~Sentinel2.getIndiceExpression
+      ~Sentinel2.getIndexExpression
       ~Sentinel2.setDescriptionMetadata
    
    
