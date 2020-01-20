@@ -11,7 +11,7 @@ This example shows how generate sample temporal sampling different delta day fro
 # import library
 # ---------------
 
-from museopheno.time_series import generateTemporalSampling
+from museopheno.time_series import generate_temporal_sampling
 
 ###############################
 # Generate acquistion date file
@@ -20,12 +20,12 @@ from museopheno.time_series import generateTemporalSampling
 start_date = '20171120'
 last_date = '20180505'
 delta = 5
-acquisition_dates = generateTemporalSampling(start_date='20171120',last_date='20180505',day_interval=delta)
+acquisition_dates = generate_temporal_sampling(start_date='20171120',last_date='20180505',day_interval=delta)
 
 print('There are {} dates between {} and {} using an interval of {} days'.format(len(acquisition_dates),start_date,last_date,delta))
 
 delta = 10
-acquisition_dates = generateTemporalSampling(start_date='20171120',last_date='20180505',day_interval=delta)
+acquisition_dates = generate_temporal_sampling(start_date='20171120',last_date='20180505',day_interval=delta)
 
 print('There are {} dates between {} and {} using an interval of {} days'.format(len(acquisition_dates),start_date,last_date,delta))
 
@@ -36,7 +36,7 @@ print('There are {} dates between {} and {} using an interval of {} days'.format
 # If you use otb ImageTimeSeriesGapFilling, you have to pass a csv with a line for each date using fmt '%Y%l%d'.
 # You can directly save as csv with this format.
 
-generateTemporalSampling(start_date='20171120',last_date='20180505',day_interval=delta,save_csv='/tmp/sample_time.csv')
+generate_temporal_sampling(start_date='20171120',last_date='20180505',day_interval=delta,save_csv='/tmp/sample_time.csv')
 
 ############################
 # Generate acquisition dates from Sentinel2 images

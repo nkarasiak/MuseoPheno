@@ -26,10 +26,10 @@ dates = [20180429, 20180513, 20180708, 20180815, 20180915, 20181015, 20181115]
 #########################################
 # Resample to every 5 days
 # ----------------------------
-dates_5days = time_series.generateTemporalSampling(dates[0],dates[-1],5)
+dates_5days = time_series.generate_temporal_sampling(dates[0],dates[-1],5)
 
     
-ts = time_series.smoothSignal(dates=dates,output_dates = dates_5days,band_order=['B1','B2'])
+ts = time_series.SmoothSignal(dates=dates,output_dates = dates_5days,bands_order=['B1','B2'])
 
 
 #######################

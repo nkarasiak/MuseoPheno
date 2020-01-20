@@ -34,12 +34,12 @@ raster,dates = datasets.Sentinel2_3a_2018(return_dates=True)
 
 S2 = sensors.Sentinel2(n_bands=10)
 
-print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
+print('Default band order for 10 bands is : '+', '.join(S2.bands_order)+'.')
 
 ###########################################################
 # List of available index : 
 
-print(S2.available_index.keys())
+print(S2.available_indices.keys())
 
 ###########################################################
 # Write metadata in each band (date + band name)
@@ -48,20 +48,20 @@ print(S2.available_index.keys())
 ###########################################################
 # This is useful to show date in band number in Qgis
 
-S2.setDescriptionMetadata(raster,dates)
+S2.set_description_metadata(raster,dates)
 
 ###########################################################
 # Produce NDVI time series from and to a raster
 # ----------------------------------------------
-S2.generateRaster(input_raster=raster,output_raster='/tmp/index.tif',expression=S2.getIndexExpression('NDVI'),dtype=np.float32)
+S2.generate_raster(input_raster=raster,output_raster='/tmp/index.tif',expression=S2.get_index_expression('NDVI'),dtype=np.float32)
 
 ##############################
 # Plot NDVI index
-from museotoolbox.raster_tools import rasterMath
+from museotoolbox.processing import RasterMath
 from matplotlib import pyplot as plt
 
-rM = rasterMath('/tmp/index.tif')
-NDVI=rM.getRandomBlock() #randomly select a block
+rM = RasterMath('/tmp/index.tif')
+NDVI = rM.get_random_block() #randomly select a block
 from datetime import datetime
 dateToDatetime = [datetime.strptime(str(date),'%Y%m%d') for date in dates]
 plt.plot_date(dateToDatetime,NDVI[:10,:].T,'-o')

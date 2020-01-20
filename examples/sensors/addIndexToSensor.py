@@ -30,15 +30,15 @@ from museopheno import sensors,datasets
 ####################################"
 # Import dataset
 # ------------------
-X,dates = datasets.Sentinel2_3a_2018(return_dates=True,get_only_sample=True)
+X,dates = datasets.Sentinel2_3a_2018(return_dates=True,return_random_sample=True)
 
 S2 = sensors.Sentinel2(n_bands=10)
 
-print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
+print('Default band order for 10 bands is : '+', '.join(S2.bands_order)+'.')
 
 ################################
 # Look at available S2 index
-S2.available_index
+S2.available_indices
 
 #################################
 # add the NBR index
@@ -47,12 +47,12 @@ S2.available_index
 #######################################
 # This index is already in MuseoPheno, but if you change the expression it will overwrite the previous one
 
-S2.addIndex('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
+S2.add_index('NBR',expression='(B08 - B12) / (B08 + B12)',condition='(B08+B12)!=0')
 
 ################################
 # compute NBR from an array
 # -----------------------------------
-NBR = S2.generateIndex(X,S2.getIndexExpression('NBR'))
+NBR = S2.generate_index(X,S2.get_index_expression('NBR'))
 
 #############################
 # Produce the index raster
@@ -61,7 +61,7 @@ NBR = S2.generateIndex(X,S2.getIndexExpression('NBR'))
 # We multiply by 100 to save with int16 datatype
 
 raster = datasets.Sentinel2_3a_2018()
-S2.generateRaster(raster,output_raster='/tmp/NBR.tif',expression=S2.getIndexExpression('NBR'),multiply_by=100,dtype=np.int16)
+S2.generate_raster(raster,output_raster='/tmp/NBR.tif',expression=S2.get_index_expression('NBR'),multiply_by=100,dtype=np.int16)
 
 ###################
 # plot result

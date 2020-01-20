@@ -26,22 +26,22 @@ dates = [20180429, 20180513, 20180708, 20180815, 20180915, 20181015, 20181115]
 #########################################
 # Resample to every 5 days
 # ----------------------------
-dates_5days = time_series.generateTemporalSampling(dates[0],dates[-1],5)
+dates_5days = time_series.generate_temporal_sampling(dates[0],dates[-1],5)
 
     
-ts = time_series.smoothSignal(dates=dates,output_dates = dates_5days)
+ts_manager = time_series.SmoothSignal(dates=dates,output_dates = dates_5days)
 
 
 #######################
 # linear interpolation
 
-x_linear = ts.interpolation(x,kind='linear')
+x_linear = ts_manager.interpolation(x,kind='linear')
 print(x_linear)
 
 #######################
 # cubic interpolation
 
-x_cubic = ts.interpolation(x,kind='cubic')
+x_cubic = ts_manager.interpolation(x,kind='cubic')
 print(x_cubic)
 
 #######################
@@ -53,21 +53,25 @@ print(x_cubic)
 #######################
 # Savitzski golay from linear interpolation
 
-x_savgol_linear = ts.savitzski_golay(x,window_length=9,polyorder=1,interpolation_params=dict(kind='linear'))
+x_savgol_linear = ts_manager.savitzski_golay(x,window_length=9,polyorder=1,interpolation_params=dict(kind='linear'))
 
 #######################
 # Savitzski golay from cubic interpolation
 
-x_savgol_cubic = ts.savitzski_golay(x,window_length=9,polyorder=1,interpolation_params=dict(kind='cubic'))
+x_savgol_cubic = ts_manager.savitzski_golay(x,window_length=9,polyorder=1,interpolation_params=dict(kind='cubic'))
+
+x_doublelogistic= ts_manager.double_logistic(x)
 
 
 #################
 # Plot results
 from matplotlib import pyplot as plt
-plt.plot_date(ts.output_datetime,x_savgol_linear.flatten(),'--',linewidth=3,color='C3',label='savitzski golay from linear interpolation',alpha=.7)    
-plt.plot_date(ts.output_datetime,x_savgol_cubic.flatten(),'--',linewidth=3,color='black',label='savitzski golay from cubic interpolation',alpha=.8)
+plt.plot_date(ts_manager.output_datetime,x_savgol_linear.flatten(),'--',linewidth=3,color='C3',label='savitzski golay from linear interpolation',alpha=.7)    
+plt.plot_date(ts_manager.output_datetime,x_savgol_cubic.flatten(),'--',linewidth=3,color='black',label='savitzski golay from cubic interpolation',alpha=.8)
 
-plt.plot_date(ts.output_datetime,x_linear.flatten(),'--',linewidth=2,color='C2',label='original with cubic interpolation',alpha=.8)
+plt.plot_date(ts_manager.output_datetime,x_doublelogistic.flatten(),'--',linewidth=3,color='C1',label='double logistic from cubic interpolation',alpha=.8)
 
-plt.plot_date(ts.init_datetime,x,'o',color='C0',markersize=8,label='Original data')
+plt.plot_date(ts_manager.output_datetime,x_linear.flatten(),'--',linewidth=2,color='C2',label='original with cubic interpolation',alpha=.8)
+
+plt.plot_date(ts_manager.init_datetime,x,'o',color='C0',markersize=8,label='Original data')
 plt.legend(loc='best')

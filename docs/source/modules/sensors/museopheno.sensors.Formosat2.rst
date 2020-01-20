@@ -13,13 +13,14 @@ Formosat2
    .. autosummary::
       :toctree: Formosat2
    
+      ~Formosat2.SmoothSignal
       ~Formosat2.__init__
-      ~Formosat2.addIndex
-      ~Formosat2.configureBandsOrder
-      ~Formosat2.generateIndex
-      ~Formosat2.generateRaster
-      ~Formosat2.getIndexExpression
-      ~Formosat2.setDescriptionMetadata
+      ~Formosat2.add_index
+      ~Formosat2.configure_bands_order
+      ~Formosat2.generate_index
+      ~Formosat2.generate_raster
+      ~Formosat2.get_index_expression
+      ~Formosat2.set_description_metadata
    
    
 

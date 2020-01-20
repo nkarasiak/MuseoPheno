@@ -13,15 +13,16 @@ Sentinel2
    .. autosummary::
       :toctree: Sentinel2
    
+      ~Sentinel2.SmoothSignal
       ~Sentinel2.__init__
-      ~Sentinel2.addIndex
-      ~Sentinel2.computeSITS
-      ~Sentinel2.configureBandsOrder
-      ~Sentinel2.generateIndex
-      ~Sentinel2.generateRaster
-      ~Sentinel2.generateTemporalSampling
-      ~Sentinel2.getIndexExpression
-      ~Sentinel2.setDescriptionMetadata
+      ~Sentinel2.add_index
+      ~Sentinel2.compute_SITS
+      ~Sentinel2.configure_bands_order
+      ~Sentinel2.generate_index
+      ~Sentinel2.generate_raster
+      ~Sentinel2.generate_temporal_sampling
+      ~Sentinel2.get_index_expression
+      ~Sentinel2.set_description_metadata
    
    
 

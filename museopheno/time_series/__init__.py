@@ -16,19 +16,72 @@
 The :mod:`museopheno.time_series` module gathers functions to compute expression and 
 smooth time series.
 """
-
-import numpy as np
 import datetime as dt
 
+import math
+import numpy as np
+np.seterr(divide='ignore')
+
 from scipy import signal
+from scipy.optimize import minimize, Bounds
+from museopheno.time_series import __dl as fun_dl # double logistic by M. Fauvel
 from scipy import interpolate
 
 import re
-np.seterr(divide='ignore')
 
+def get_phenology_metrics(X,sos=0.2,eos=0.8):
+    feat = PhenologyMetrics(X,sos,eos)
+    
+    return feat.sos,feat.eos
 
-def __convertBandToArrayIdx(X, expression, n_comp,
-                            date, band_order, condition=False, order_by='date', nodata=-9999):
+class PhenologyMetrics:
+    """
+    Get phenology metrics from one feature.
+    start of season, end of season, length of season and amplitude.
+    
+    Parameters
+    ------------
+    X : array
+        array (1 dim)
+    sos : float
+        Percentage
+    eos : float
+        Percentage 
+    """
+    def __init__(self,X,sos=0.2,eos=0.8):
+        self._argmax = np.argmax(X)
+        self._argmin = np.argmin(X)
+        self.sos_thresold = sos
+        self.eos_thresold = eos
+
+        self.n_features = 1
+        if X.ndim ==2:
+            if X.shape[0] != 1:
+                raise ValueError('only one feature at a time')
+    
+        self.X = X.flatten()
+            
+        self._get_sos()
+        self._get_eos()
+        self._get_los()
+        self._get_amp()
+        
+    def _get_sos(self):
+        val = np.amin(self.X[...,:self._argmax])+self.sos_thresold*(self.X[...,self._argmax]-np.amin(self.X[...,:self._argmax]))
+        idx = np.searchsorted(self.X,val)
+        self.sos = idx
+    def _get_eos(self):
+        val = np.amin(self.X[...,self._argmax:])+self.eos_thresold*(self.X[...,self._argmax]-np.amin(self.X[...,self._argmax:]))
+        idx = np.searchsorted(self.X[::-1],val,side='right')
+        self.eos = len(self.X)-idx
+    def _get_los(self):
+        self.los = self.eos-self.sos
+    def _get_amp(self):
+        self.amp = self.X[self._argmax]-self.X[self._argmin]
+        
+        
+def _convert_band_to_array_idx(X, expression, n_comp,
+                            date, bands_order, condition=False, order_by='date', nodata=-9999):
     X = np.copy(X)
 #    bandsToChange = re.findall('B[0-9]*',str(expression))
     bandsToChange = re.findall('B[0-9]*[A-Z]*', str(expression))
@@ -39,7 +92,7 @@ def __convertBandToArrayIdx(X, expression, n_comp,
         originalBand = band[1:]  # to remove B
         while originalBand[0] == '0':
             originalBand = originalBand[1:]
-        bandIdx = np.where(np.in1d(band_order, originalBand) == True)[0]
+        bandIdx = np.where(np.in1d(bands_order, originalBand) == True)[0]
 
         if order_by == 'date':
             newBand = n_comp * date + bandIdx
@@ -48,6 +101,8 @@ def __convertBandToArrayIdx(X, expression, n_comp,
 
         if condition:
             condition = condition.replace(band, "X[:,{}]".format(newBand))
+        if isinstance(expression,list):
+            expression = expression[0]
         expression = expression.replace(band, "X[:,{}]" .format(newBand))
 
     if condition:
@@ -58,32 +113,32 @@ def __convertBandToArrayIdx(X, expression, n_comp,
     return out.flatten()
 
 
-def _areBandsAvailables(band_order, expression, compulsory=True):
+def _are_bands_availables(bands_order, expression, compulsory=True):
     """
     Check if band needed for expression are available
 
     Parameters
     -----------
-    band_order : list
+    bands_order : list
         list of bands (e.g. ['2','3','4','8'])
     expression : str
         expression (e.g. 'B08/B02*100')
 
     Examples
     ---------
-    >>> _areBandsAvailables(['2','3','4','8'],'B08/B02*100')
+    >>> _are_bands_availables(['2','3','4','8'],'B08/B02*100')
     True
-    >>> _areBandsAvailables(['2','3','4','8'],'B8A/B04*100')
+    >>> _are_bands_availables(['2','3','4','8'],'B8A/B04*100')
     ValueError: Band ['B8A'] is missing.
     """
     bandsToChange = re.findall('B[0-9]*[A-Z]*', str(expression))
-    band_order_withoutB = []
-    for b in band_order:
+    bands_order_withoutB = []
+    for b in bands_order:
         if b.capitalize().startswith('B'):
             b = b[1:]
         while b[0] == '0':
             b = b[1:]
-        band_order_withoutB.append(str(b).capitalize())
+        bands_order_withoutB.append(str(b).capitalize())
 
     missing_bands = []
 
@@ -92,7 +147,7 @@ def _areBandsAvailables(band_order, expression, compulsory=True):
         while str(band_withoutBand0).find('0') == 0:
             band_withoutBand0 = band_withoutBand0[1:]
 
-        if str(band_withoutBand0).capitalize() in band_order_withoutB:
+        if str(band_withoutBand0).capitalize() in bands_order_withoutB:
             pass
         else:
             missing_bands.append(band)
@@ -111,10 +166,10 @@ def _areBandsAvailables(band_order, expression, compulsory=True):
         return True
 
 
-def expressionManager(X, band_order, expression, interpolate_nan=True,
+def ExpressionManager(X, bands_order, expression, interpolate_nan=True,
                       divide_X_by=1, multiply_by=1, order_by='date', dtype=np.float32):
     """
-    Generate expression/index from an array according to a band_order, and expression.
+    Generate expression/index from an array according to a bands_order, and expression.
 
     The easiest way to use it is to choose a sensor from :class:`museopheno.sensors`.
 
@@ -122,7 +177,7 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
     ----------
     X : array.
         array where each line is a pixel.
-    band_order : list
+    bands_order : list
         list of band order (e.g. ['2','3','4','8'])
     expression : str or dict.
         If str, contains only the expression (e.g. 'B8/B2')
@@ -144,22 +199,22 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
     --------
     >>> from museopheno import datasets, expressionManager
     >>> X = datasets.Sentinel2_3a_2018(get_only_sample=True)
-    >>> indices.generateIndice(X,band_order=['2','3','4','8','5','6','7','8A','11','12'],expression='B4/B8')
+    >>> indices.generateIndice(X,bands_order=['2','3','4','8','5','6','7','8A','11','12'],expression='B4/B8')
 
 
     """
 
-    def __nan_helper(y):
+    def _nan_helper(y):
         return np.isnan(y), lambda z: z.nonzero()[0]
 
     if X.ndim == 1:
         X = X.reshape(1, -1)
     X = X / divide_X_by
 
-    nDates = X.shape[1] / len(band_order)
-    if nDates != int(X.shape[1] / len(band_order)):
+    nDates = X.shape[1] / len(bands_order)
+    if nDates != int(X.shape[1] / len(bands_order)):
         raise ValueError(
-            'band_order is not a multiple of the number of columns of your array which contains {} bands.'.format(
+            'bands_order is not a multiple of the number of columns of your array which contains {} bands.'.format(
                 X.shape[1]))
     else:
         n_comp = int(X.shape[1] / nDates)
@@ -167,7 +222,7 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
 
     outIndice = np.zeros((X.shape[0], nDates), dtype=np.float64)
 
-    if _areBandsAvailables(band_order, expression):
+    if _are_bands_availables(bands_order, expression):
         for date in range(nDates):
             if isinstance(expression, str):
                 mathExp = expression
@@ -178,8 +233,8 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
                     condition = expression['condition']
                 else:
                     condition = False
-            dateIndice = __convertBandToArrayIdx(
-                X, mathExp, n_comp, date, band_order, condition=condition, order_by=order_by)
+            dateIndice = _convert_band_to_array_idx(
+                X, mathExp, n_comp, date, bands_order, condition=condition, order_by=order_by)
             outIndice[:, date] = dateIndice
 
         if interpolate_nan:
@@ -192,7 +247,7 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
                 outIndice)
 
             for i in range(outIndice.shape[0]):
-                nans, x = __nan_helper(outIndice[i, :])
+                nans, x = _nan_helper(outIndice[i, :])
                 if not np.all(nans == False):
                     outIndice[i, nans] = np.interp(
                         x(nans), x(~nans), outIndice[i, ~nans])
@@ -205,8 +260,8 @@ def expressionManager(X, band_order, expression, interpolate_nan=True,
         return outIndice
 
 
-class smoothSignal:
-    def __init__(self, dates, band_order=False, order_by='date', output_dates=False, fmt='%Y%m%d'):
+class SmoothSignal:
+    def __init__(self, dates, bands_order=False, order_by='date', output_dates=False, fmt='%Y%m%d'):
         """
         Smooth time series signal.
 
@@ -214,7 +269,7 @@ class smoothSignal:
         -----------
         dates : list
             list of dates. E.g. ['20180101','20180201']
-        band_order : list, optional.
+        bands_order : list, optional.
         order_by : str
             Default is 'date', 
             'band'.
@@ -226,8 +281,8 @@ class smoothSignal:
         --------
         >>> x = np.asarray([3.4825737, 4.27786  , 5.0373, 4.7196426, 4.1233397, 4.0338645,2.7735472])
         >>> y = [20180429, 20180513, 20180708, 20180815, 20180915, 20181015, 20181115]
-        >>> new_dates = generateTemporalSampling(y[0],y[-1],10) # temporal sampling every 10 days
-        >>> timeseries = smoothSignal(dates=y,output_dates=new_dates)
+        >>> new_dates = generate_temporal_sampling(y[0],y[-1],10) # temporal sampling every 10 days
+        >>> timeseries = SmoothSignal(dates=y,output_dates=new_dates)
         >>> timeseries.interpolation(x,kind='cubic')
         array([3.4825737 , 4.08649468, 4.516693  , 4.80103881, 4.96740226,
            5.0436535 , 5.0576627 , 5.0373    , 5.00281393, 4.94396649,
@@ -241,14 +296,14 @@ class smoothSignal:
            4.09053213, 4.04814943, 3.88019043, 3.58665514, 3.18010117,
            2.7735472 ])
         """
-        self.band_order = band_order
+        self.bands_order = bands_order
         self.order_by = order_by
 
         # input dates
         self.init_dates = dates
         self.init_n_dates = len(dates)
-        self.init_datetime = self.convertToDatetime(dates, fmt=fmt)
-        self.init_dates_int = self._convertDateToInteger(
+        self.init_datetime = self.convert_to_datetime(dates, fmt=fmt)
+        self.init_dates_int = self._convert_date_to_integer(
             self.init_datetime, fmt=fmt)
 
         # output dates
@@ -256,18 +311,19 @@ class smoothSignal:
             output_dates = dates
         self.output_dates = output_dates
         self.output_n_dates = len(output_dates)
-        self.output_datetime = self.convertToDatetime(output_dates, fmt=fmt)
-        self.output_dates_int = self._convertDateToInteger(
+        self.output_datetime = self.convert_to_datetime(output_dates, fmt=fmt)
+        self.output_dates_int = self._convert_date_to_integer(
             self.output_datetime, fmt=fmt, start_date=self.init_datetime[0])
-
-    def _getTimeSeriesPositionPerBand(self, X):
+        
+        self.output_dates_delta = self.output_dates_int[1]-self.output_dates_int[0]
+    def _get_time_series_position_per_band(self, X):
         """
         Yields the time series for each band (all the B2, all the B8...)
         """
-        if self.band_order:
-            if int(X.shape[1]/self.init_n_dates) != len(self.band_order):
+        if self.bands_order is not False:
+            if int(X.shape[1]/self.init_n_dates) != len(self.bands_order):
                 raise ValueError('mismatch')
-            for idx_band in range(len(self.band_order)):
+            for idx_band in range(len(self.bands_order)):
                 if self.order_by == 'date':
                     input_bands_position = [
                         idx_band*self.init_n_dates+d for d in range(self.init_n_dates)]
@@ -285,26 +341,26 @@ class smoothSignal:
 
             yield input_bands_position, output_bands_position
 
-    def _resizeIfFlatten(self, X):
+    def _resize_if_flatten(self, X):
         if X.ndim == 1:
             X = X.reshape(1, -1)
         return X
 
-    def _getEmptyOutputArray(self, X):
-        X = self._resizeIfFlatten(X)
-        if self.band_order:
-            multiply_by = len(self.band_order)
+    def _get_empty_output_array(self, X):
+        X = self._resize_if_flatten(X)
+        if self.bands_order is not False:
+            multiply_by = len(self.bands_order)
         else:
             multiply_by = 1
         out_x = np.empty(
             (X.shape[0], len(self.output_dates)*multiply_by), X.dtype)
-        self._resizeIfFlatten(out_x)
+        self._resize_if_flatten(out_x)
 
         return out_x
 
-    def _convertDateToInteger(self, dates, fmt='%Y%m%d', convert_to_datetime=False, start_date=False):
+    def _convert_date_to_integer(self, dates, fmt='%Y%m%d', convert_to_datetime=False, start_date=False):
         if convert_to_datetime:
-            dates = self.convertToDateTime(dates, fmt)
+            dates = self.convert_to_datetime(dates, fmt)
 
         if start_date:
             if convert_to_datetime:
@@ -317,7 +373,7 @@ class smoothSignal:
 
         return dates_start_at_zero
 
-    def convertToDatetime(self, dates, fmt='%Y%m%d'):
+    def convert_to_datetime(self, dates, fmt='%Y%m%d'):
         """
         Convert list of dates to a list of dates with datetime type.
 
@@ -330,9 +386,47 @@ class smoothSignal:
         """
         return [dt.datetime.strptime(str(date), fmt) for date in dates]
 
-    def whiitaker(self, X):
-        print('TODO')
+    def double_logistic(self, X, kind='cubic'):
+        """
+        Generate a double logistic curve similar to those of the MODIS phenology product.
+        
+        Parameters
+        ------------
+        X : array_like
+            A N-D array of real values. The length of y along the interpolation axis must be equal to the length of dates.
+        kind : str, default 'linear'
+            Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
 
+        """
+        x = self._get_empty_output_array(X)
+        X = self._resize_if_flatten(X)
+        if X.ndim == 2:    
+            if X.shape[-1] != self.output_dates_int:
+                X = self.interpolation(X,kind=kind)
+        else:
+            raise ValueError('X array must be of shape [2,-1].')
+        print(X)
+        
+        params = np.asarray([1.0, 0.0, 75.0, 8.0, 250.0, 1.0])+ 10*np.random.rand(6)
+        
+        for n_row in range(X.shape[0]):
+            
+            solver = fun_dl.minimize(fun_dl.cost_function,
+                              params,
+                              args=(np.asarray(self.output_dates_int), X[n_row,:]),
+                              method='L-BFGS-B',
+                              jac=fun_dl.cost_function_grad,
+                              options={'gtol': 1e-10,
+                                       'ftol': 1e-10,
+                                       'maxiter':1000,
+                                       'maxcor':1000,
+                                       'maxfun':1000})
+        
+            # Show estimated function
+            x[n_row,:] = fun_dl.double_logistique(solver.x, np.asarray(self.output_dates_int))
+    
+        return x
+        
     def interpolation(self, X, kind='linear', **params):
         """
         Based on :class:`scipy.interpolate.interp1d`
@@ -349,12 +443,12 @@ class smoothSignal:
         ----------
         :class:`scipy.interpolate.interp1d`
         """
-        x = self._getEmptyOutputArray(X)
-        X = self._resizeIfFlatten(X)
-        for in_band, out_band in self._getTimeSeriesPositionPerBand(X):
+        x = self._get_empty_output_array(X)
+        X = self._resize_if_flatten(X)
+        for in_band, out_band in self._get_time_series_position_per_band(X):
             tmp = interpolate.interp1d(
                 self.init_dates_int, X[:, in_band], kind=kind, **params)
-            tmp = self._resizeIfFlatten(tmp(self.output_dates_int))
+            tmp = self._resize_if_flatten(tmp(self.output_dates_int))
             x[:, out_band] = tmp
         return (x)
 
@@ -367,17 +461,17 @@ class smoothSignal:
         ----------
         :class:`scipy.signal.savgol_filter`
         """
-        x = self._getEmptyOutputArray(X)
-        X = self._resizeIfFlatten(X)
-        for in_band, out_band in self._getTimeSeriesPositionPerBand(X):
+        x = self._get_empty_output_array(X)
+        X = self._resize_if_flatten(X)
+        for in_band, out_band in self._get_time_series_position_per_band(X):
             tmp = interpolate.interp1d(
                 self.init_dates_int, X[:, in_band], **interpolation_params)
-            x[:, out_band] = self._resizeIfFlatten(signal.savgol_filter(
+            x[:, out_band] = self._resize_if_flatten(signal.savgol_filter(
                 tmp(self.output_dates_int), window_length, polyorder, **params))
         return x
 
 
-def generateTemporalSampling(start_date, last_date, day_interval=5, save_csv=False, fmt='%Y%m%d'):
+def generate_temporal_sampling(start_date, last_date, day_interval=5, save_csv=False, fmt='%Y%m%d'):
     """
     Generate a custom temporal sampling for Satellite Image Time Series.
 
@@ -418,14 +512,14 @@ def generateTemporalSampling(start_date, last_date, day_interval=5, save_csv=Fal
     start_date = dt.datetime.strptime(start_date, fmt)
     last_date = dt.datetime.strptime(last_date, fmt)
 
-    customeAcquisitionDates = [start_date.strftime('%Y%m%d')]
+    custom_acquisition_dates = [start_date.strftime('%Y%m%d')]
     newDate = start_date
     while newDate < last_date:
         newDate = newDate + dt.timedelta(day_interval)
-        customeAcquisitionDates.append(newDate.strftime('%Y%m%d'))
+        custom_acquisition_dates.append(newDate.strftime('%Y%m%d'))
 
     if save_csv:
         np.savetxt(save_csv, np.asarray(
-            customeAcquisitionDates, dtype=np.int), fmt='%d')
+            custom_acquisition_dates, dtype=np.int), fmt='%d')
     else:
-        return np.asarray(customeAcquisitionDates, dtype=np.int)
+        return np.asarray(custom_acquisition_dates, dtype=np.int)

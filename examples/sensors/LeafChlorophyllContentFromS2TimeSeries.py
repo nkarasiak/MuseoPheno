@@ -38,10 +38,10 @@ raster,dates = datasets.Sentinel2_3a_2018(return_dates=True)
 
 S2 = sensors.Sentinel2(n_bands=10)
 
-print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
+print('Default band order for 10 bands is : '+', '.join(S2.bands_order)+'.')
 
 # List of available index : 
-S2.available_index.keys()
+S2.available_indices.keys()
 
 ###########################################################
 # Write metadata in each band (date + band name)
@@ -52,21 +52,21 @@ S2.available_index.keys()
 # raster timeseries manager plugin on QGIS or to have the date and the band in
 # the list of bands QGIS.
 
-S2.setDescriptionMetadata(raster,dates)
+S2.set_description_metadata(raster,dates)
 
 #########################################
 # Generate index from array
 # ---------------------------------
 
-X = datasets.Sentinel2_3a_2018(get_only_sample=True)
-LChloC = S2.generateIndex(X,S2.getIndexExpression('LChloC'),dtype=np.float32)
+X = datasets.Sentinel2_3a_2018(return_random_sample=True)
+LChloC = S2.generate_index(X,S2.get_index_expression('LChloC'),dtype=np.float32)
 print(LChloC)
 
 #########################################
 # Generate index from and to a raster
 # ---------------------------------------
 
-S2.generateRaster(input_raster=raster,output_raster='/tmp/LChloC.tif',expression=S2.getIndexExpression('LChloC'),dtype=np.float32)
+S2.generate_raster(input_raster=raster,output_raster='/tmp/LChloC.tif',expression=S2.get_index_expression('LChloC'),dtype=np.float32)
 
 
 #########################################

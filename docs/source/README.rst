@@ -35,9 +35,9 @@ The `documentation is hosted on readthedocs <https://museopheno.readthedocs.org/
 What does MuseoPheno do today ?
 ===============================
 
-MuseoPheno eases the way to compute Sentinel2 level 2A time series and spectral indices in time series.
+MuseoPheno globally eases the way to smooth or compute index for time series from raster or vector.
 
-Plus, you have a command line to produce a Sentinel2 raster time series :
+It has a special feature to compute Sentinel2 level 2A time series by providing a command line to produce a Sentinel2 raster time series :
 ``museopheno.computeS2SITS -S2dir /tmp/S2_2018/ -unzip True -out /mnt/SITS_2018.tif``
 
 Don't manage temporal information, MuseoPheno do it for you

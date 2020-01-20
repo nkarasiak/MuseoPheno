@@ -26,7 +26,7 @@ The raster is order date per date (blue,green,red...date 1 then blue,green,red..
 
 import numpy as np
 from museopheno import sensors,datasets
-from museotoolbox.raster_tools import rasterMath
+from museotoolbox.processing import RasterMath
 
 ###########################################################
 # Import dataset
@@ -39,33 +39,33 @@ raster,dates = datasets.Sentinel2_3a_2018(return_dates=True)
 S2 = sensors.Sentinel2(n_bands=10)
 
 # check default band_order
-print('Default band order for 10 bands is : '+', '.join(S2.band_order)+'.')
+print('Default band order for 10 bands is : '+', '.join(S2.bands_order)+'.')
 
 # List of available index : 
-S2.available_index.keys()
+S2.available_indices.keys()
 
 ###########################################################
 # Write metadata in each band (date + band name)
 # ------------------------------------------------------
 
-S2.setDescriptionMetadata(raster,dates)
+S2.set_description_metadata(raster,dates)
 
 ###########################################################
 # Generate a raster with LChloC index
 # ---------------------------------------------
 
 # show expression and condition of LChloC index
-print(S2.getIndexExpression('LChloC'))
+print(S2.get_index_expression('LChloC'))
 
 # generate raster
-S2.generateRaster(input_raster=raster,output_raster='/tmp/S2.tif',expression=S2.getIndexExpression('LChloC'),dtype=np.float32)
+S2.generate_raster(input_raster=raster,output_raster='/tmp/S2.tif',expression=S2.get_index_expression('LChloC'),dtype=np.float32)
 
 ######################################"
 # Plot image
 
-rM = rasterMath(raster)
-X=rM.getRandomBlock()
-NDVI = S2.generateIndex(X,S2.getIndexExpression('LChloC'),dtype=np.float32)
+rM = RasterMath(raster)
+X=rM.get_random_block()
+NDVI = S2.generate_index(X,S2.get_index_expression('LChloC'),dtype=np.float32)
 
 from matplotlib import pyplot as plt
 from datetime import datetime

@@ -21,7 +21,7 @@ import os
 __pathFile = os.path.dirname(os.path.realpath(__file__))
 
 
-def Sentinel2_3a_2018(return_dates=False, get_only_sample=False):
+def Sentinel2_3a_2018(return_dates=False, return_random_sample=False):
     """
     Sentinel2 sample dataset on Bouconne Forest (France, near Toulouse).
     Bands are ordered this way : '2','3','4','8','5','6','7','8','8A','11','12'.
@@ -30,9 +30,9 @@ def Sentinel2_3a_2018(return_dates=False, get_only_sample=False):
     -----------
     return_dates : bool, default False
         If True, will return list of dates.
-    get_only_sample : bool, default False
+    return_random_sample : bool, default False
         If False, will return the path of the raster
-        If True, will return a random block
+        If True, will return a random block of the image
 
     Returns
     -------
@@ -75,9 +75,9 @@ def Sentinel2_3a_2018(return_dates=False, get_only_sample=False):
         20180915,
         20181015,
         20181115]
-    if get_only_sample is True:
-        from museotoolbox.raster_tools import rasterMath
-        raster = rasterMath(raster).getRandomBlock()
+    if return_random_sample is True:
+        from museotoolbox.processing import RasterMath
+        raster = RasterMath(raster).get_random_block()
     if return_dates:
         return raster, dates
     else:

@@ -16,8 +16,9 @@ sensors
       :template: class.rst
    
       Formosat2
+      SensorManager
       Sentinel2
-      sensorManager
+      Venus
    
    
 
