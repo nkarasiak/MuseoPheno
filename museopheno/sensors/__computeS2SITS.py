@@ -15,9 +15,6 @@
 import os
 import numpy as np
 import glob
-import sys
-import argparse
-
 
 def _computeSITS(
         S2Dir,
@@ -80,7 +77,7 @@ def _computeSITS(
         reflectance_type = 'FRE'
     else:
         reflectance_type = 'SRE'
-    print(reflectance_type)
+    
     # =============================================================================
     #     The python module providing access to OTB applications is otbApplication
     # =============================================================================
@@ -177,19 +174,16 @@ def _computeSITS(
     YYYYMMDDstart = p.search(S2[0]).start()
     YYYYMMDDend = p.search(S2[0]).end()
 
-    if resample_CSV is False:
-        AcquisitionDates = [p.findall(S2folder)[0] for S2folder in S2]
-        AcquisitionDatesCsv = os.path.join(outDir, 'sample_time.csv')
-        np.savetxt(
-            AcquisitionDatesCsv,
-            np.sort(
-                np.asarray(
-                    AcquisitionDates,
-                    dtype=np.int)),
-            fmt='%d')
-    else:
-        AcquisitionDatesCsv = resample_CSV
-    
+    AcquisitionDates = [p.findall(S2folder)[0] for S2folder in S2]
+    AcquisitionDatesCsv = os.path.join(outDir, 'sample_time.csv')
+    np.savetxt(
+        AcquisitionDatesCsv,
+        np.sort(
+            np.asarray(
+                AcquisitionDates,
+                dtype=np.int)),
+        fmt='%d')
+
     # =============================================================================
     #     Order directory according to date
     # =============================================================================

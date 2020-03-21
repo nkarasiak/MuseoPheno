@@ -102,7 +102,7 @@ class SensorManager:
 
     def SmoothSignal(self,input_dates,output_dates=False,fmt='%Y%m%d'):
         from museopheno.time_series import SmoothSignal
-        return SmoothSignal(dates=input_dates,output_dates=output_dates, fmt=fmt)
+        return SmoothSignal(dates=input_dates,output_dates=output_dates, bands_order=self.bands_order, fmt=fmt)
     
     def add_index(self, index_name, expression,
                  condition=False, compulsory=True):
@@ -308,7 +308,7 @@ class Sentinel2(SensorManager):
     {'expression': '(B8-B4)/(B8+B4)', 'condition': '(B8+B4) != 0'}
     """
 
-    def __init__(self, n_bands=4, bands_order='default'):
+    def __init__(self, n_bands=10, bands_order='default'):
 
         self.n_bands = n_bands
 
@@ -585,8 +585,8 @@ class Formosat2(SensorManager):
             else:
                 self.add_index(
                     idx,
-                    index[idx][0],
-                    index[idx][1],
+                    indices[idx][0],
+                    indices[idx][1],
                     compulsory=False)
 
 
@@ -646,7 +646,7 @@ class Venus(SensorManager):
 
         for idx in indices.keys():
             if len(indices[idx]) == 1:
-                self.add_index(idx, index[idx], compulsory=False)
+                self.add_index(idx, indices[idx], compulsory=False)
             else:
                 self.add_index(
                     idx,

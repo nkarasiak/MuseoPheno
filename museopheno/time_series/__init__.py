@@ -303,6 +303,7 @@ class SmoothSignal:
         self.init_dates = dates
         self.init_n_dates = len(dates)
         self.init_datetime = self.convert_to_datetime(dates, fmt=fmt)
+        self.init_doy = self.convert_to_doy(dates, fmt=fmt)
         self.init_dates_int = self._convert_date_to_integer(
             self.init_datetime, fmt=fmt)
 
@@ -311,11 +312,13 @@ class SmoothSignal:
             output_dates = dates
         self.output_dates = output_dates
         self.output_n_dates = len(output_dates)
+        self.output_doy = self.convert_to_doy(output_dates, fmt=fmt)
         self.output_datetime = self.convert_to_datetime(output_dates, fmt=fmt)
         self.output_dates_int = self._convert_date_to_integer(
             self.output_datetime, fmt=fmt, start_date=self.init_datetime[0])
         
         self.output_dates_delta = self.output_dates_int[1]-self.output_dates_int[0]
+        
     def _get_time_series_position_per_band(self, X):
         """
         Yields the time series for each band (all the B2, all the B8...)
@@ -324,16 +327,16 @@ class SmoothSignal:
             if int(X.shape[1]/self.init_n_dates) != len(self.bands_order):
                 raise ValueError('mismatch')
             for idx_band in range(len(self.bands_order)):
-                if self.order_by == 'date':
+                if self.order_by == 'band':
                     input_bands_position = [
                         idx_band*self.init_n_dates+d for d in range(self.init_n_dates)]
                     output_bands_position = [
                         idx_band*self.output_n_dates+d for d in range(self.output_n_dates)]
-                elif self.order_by == 'band':
+                elif self.order_by == 'date':
                     input_bands_position = [
-                        idx_band+len(self.init_dates)*d for d in range(self.init_n_dates)]
+                        idx_band+ len(self.bands_order) *d for d in range( len(self.init_dates) ) ]
                     output_bands_position = [
-                        idx_band+len(self.output_dates)*d for d in range(self.output_n_dates)]
+                        idx_band+len(self.bands_order) *d for d in range( len(self.output_dates) ) ]
                 yield input_bands_position, output_bands_position
         else:
             input_bands_position = np.arange(len(self.init_dates))
@@ -373,6 +376,19 @@ class SmoothSignal:
 
         return dates_start_at_zero
 
+    def convert_to_doy(self, dates, fmt='%Y%m%d'):
+        """
+        Convert list of dates to Day Of Year (DOY) number.
+        
+        Parameters
+        -----------
+        dates : list
+            List of dates
+        fmt : str
+            Format type of each date
+
+        """
+        return [dt.datetime.strptime(str(date), fmt).timetuple().tm_yday for date in dates]
     def convert_to_datetime(self, dates, fmt='%Y%m%d'):
         """
         Convert list of dates to a list of dates with datetime type.
@@ -405,24 +421,30 @@ class SmoothSignal:
                 X = self.interpolation(X,kind=kind)
         else:
             raise ValueError('X array must be of shape [2,-1].')
-        print(X)
         
-        params = np.asarray([1.0, 0.0, 75.0, 8.0, 250.0, 1.0])+ 10*np.random.rand(6)
-        
+        params = np.asarray([1.0, 5.0, 75.0, 8.0, 250.0, 1.0])+ 10*np.random.rand(6)
         for n_row in range(X.shape[0]):
+            success = False
+            increase_max = 1000
+            while success is False:
+                solver = fun_dl.minimize(fun_dl.cost_function,
+                                  params,
+                                  args=(np.asarray(self.output_dates_int), X[n_row,:]),
+                                  method='L-BFGS-B',
+                                  jac=fun_dl.cost_function_grad,                                 
+                                  options={'gtol': 1e-10,
+                                           'ftol': 1e-10,
+                                           'maxiter':increase_max,
+                                           'maxcor':increase_max,
+                                           'maxfun':increase_max,
+                                           'maxls':100})
             
-            solver = fun_dl.minimize(fun_dl.cost_function,
-                              params,
-                              args=(np.asarray(self.output_dates_int), X[n_row,:]),
-                              method='L-BFGS-B',
-                              jac=fun_dl.cost_function_grad,
-                              options={'gtol': 1e-10,
-                                       'ftol': 1e-10,
-                                       'maxiter':1000,
-                                       'maxcor':1000,
-                                       'maxfun':1000})
-        
-            # Show estimated function
+                # Show estimated function
+                success = solver.success
+                if success is False:
+                    increase_max += 1000
+                if increase_max == 10000:
+                    success = True
             x[n_row,:] = fun_dl.double_logistique(solver.x, np.asarray(self.output_dates_int))
     
         return x
@@ -451,6 +473,24 @@ class SmoothSignal:
             tmp = self._resize_if_flatten(tmp(self.output_dates_int))
             x[:, out_band] = tmp
         return (x)
+
+    def iterative_median(self, X, window_length=3, interpolation_params={}, **params):
+        """
+        Savitzski golay 
+        Based on :class:`scipy.signal.savgol_filter`
+
+        References
+        ----------
+        :class:`scipy.signal.savgol_filter`
+        """
+        x = self._get_empty_output_array(X)
+        X = self._resize_if_flatten(X)
+        for in_band, out_band in self._get_time_series_position_per_band(X):
+            tmp = interpolate.interp1d(
+                self.init_dates_int, X[:, in_band], **interpolation_params)
+            x[:, out_band] = self._resize_if_flatten(signal.medfilt(
+                tmp(self.output_dates_int), kernel_size = window_length))
+        return x
 
     def savitzski_golay(self, X, window_length=3, polyorder=1, interpolation_params={}, **params):
         """
