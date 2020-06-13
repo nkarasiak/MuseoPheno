@@ -1,7 +1,7 @@
 
 
 Examples using ``museopheno.sensors.Sentinel2.generateTemporalSampling``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
@@ -9,9 +9,9 @@ Examples using ``museopheno.sensors.Sentinel2.generateTemporalSampling``
 
 .. only:: html
 
-    .. figure:: /auto_examples/time_series/images/thumb/sphx_glr_generateTemporalSampling_thumb.png
+ .. figure:: /auto_examples/time_series/images/thumb/sphx_glr_generateTemporalSampling_thumb.png
 
-        :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
+     :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
 
 .. raw:: html
 
@@ -19,4 +19,4 @@ Examples using ``museopheno.sensors.Sentinel2.generateTemporalSampling``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
+ * :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`

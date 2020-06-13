@@ -1,17 +1,17 @@
 
 
 Examples using ``museopheno.sensors.Sentinel2``
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 .. raw:: html
 
-    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to produce a NDVI time series from a Sentinel-2 time series. ">
+    <div class="sphx-glr-thumbcontainer" tooltip="This example shows how to produce a NDVI time series from a Sentinel-2 time series.">
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_generateNDVIRaster_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_generateNDVIRaster_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
+     :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
 
 .. raw:: html
 
@@ -19,7 +19,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
+ * :ref:`sphx_glr_auto_examples_sensors_generateNDVIRaster.py`
 
 .. raw:: html
 
@@ -27,9 +27,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_LeafChlorophyllContentFromS2TimeSeries_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_LeafChlorophyllContentFromS2TimeSeries_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
+     :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
 
 .. raw:: html
 
@@ -37,7 +37,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
+ * :ref:`sphx_glr_auto_examples_sensors_LeafChlorophyllContentFromS2TimeSeries.py`
 
 .. raw:: html
 
@@ -45,9 +45,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndexToSensor_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndexToSensor_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
+     :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
 
 .. raw:: html
 
@@ -55,7 +55,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
+ * :ref:`sphx_glr_auto_examples_sensors_addIndexToSensor.py`
 
 .. raw:: html
 
@@ -63,9 +63,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_NDVI_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_NDVI_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
+     :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
 
 .. raw:: html
 
@@ -73,7 +73,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
+ * :ref:`sphx_glr_auto_examples_sensors_S2_NDVI.py`
 
 .. raw:: html
 
@@ -81,9 +81,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_LChloC_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_S2_LChloC_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
+     :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
 
 .. raw:: html
 
@@ -91,7 +91,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
+ * :ref:`sphx_glr_auto_examples_sensors_S2_LChloC.py`
 
 .. raw:: html
 
@@ -99,9 +99,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndextoRaster_thumb.png
+ .. figure:: /auto_examples/sensors/images/thumb/sphx_glr_addIndextoRaster_thumb.png
 
-        :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
+     :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
 
 .. raw:: html
 
@@ -109,7 +109,7 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
+ * :ref:`sphx_glr_auto_examples_sensors_addIndextoRaster.py`
 
 .. raw:: html
 
@@ -117,9 +117,9 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: html
 
-    .. figure:: /auto_examples/time_series/images/thumb/sphx_glr_generateTemporalSampling_thumb.png
+ .. figure:: /auto_examples/time_series/images/thumb/sphx_glr_generateTemporalSampling_thumb.png
 
-        :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
+     :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
 
 .. raw:: html
 
@@ -127,4 +127,4 @@ Examples using ``museopheno.sensors.Sentinel2``
 
 .. only:: not html
 
-    * :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`
+ * :ref:`sphx_glr_auto_examples_time_series_generateTemporalSampling.py`

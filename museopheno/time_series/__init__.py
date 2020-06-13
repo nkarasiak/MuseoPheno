@@ -22,17 +22,27 @@ import math
 import numpy as np
 np.seterr(divide='ignore')
 
-from scipy import signal
-from scipy.optimize import minimize, Bounds
-from museopheno.time_series import __dl as fun_dl # double logistic by M. Fauvel
 from scipy import interpolate
+from scipy import signal
+from scipy.ndimage import median_filter
+from scipy.optimize import minimize, Bounds
+
+from museopheno.time_series import __dl as fun_dl # double logistic by M. Fauvel
 
 import re
 
-def get_phenology_metrics(X,sos=0.2,eos=0.8):
-    feat = PhenologyMetrics(X,sos,eos)
-    
-    return feat.sos,feat.eos
+def get_phenology_metrics(X,sos=0.2,eos=0.8,min_from_year=True):
+    if X.ndim==2 and X.shape[0] != 1:
+        feats = np.zeros((X.shape[0],2))
+        for feature in range(X.shape[0]):
+            feat = PhenologyMetrics(X[feature,...],sos,eos,min_from_year=min_from_year)    
+            feats[feature,:] = feat.sos,feat.eos
+            
+    else:
+        feat = PhenologyMetrics(X,sos,eos,min_from_year=min_from_year)
+        feats = np.asarray([feat.sos,feat.eos]).reshape(-1,2)
+        
+    return feats
 
 class PhenologyMetrics:
     """
@@ -48,12 +58,22 @@ class PhenologyMetrics:
     eos : float
         Percentage 
     """
-    def __init__(self,X,sos=0.2,eos=0.8):
-        self._argmax = np.argmax(X)
-        self._argmin = np.argmin(X)
+    def __init__(self,X,sos=0.2,eos=0.8,min_from_year=True):
+        
+        # thresold
         self.sos_thresold = sos
         self.eos_thresold = eos
-
+        
+        # arg 
+        self._argmax = np.argmax(X)
+        self._argmin_sos = np.argmin(X[...,:self._argmax])
+        self._argmin_eos = self._argmax+np.argmin(X[...,self._argmax:])
+        self._min_from_year = min_from_year
+        # val
+        self._min = np.amin((X[...,self._argmin_sos],X[...,self._argmin_eos]))
+        self._max = X[...,self._argmax]
+    
+        # n_features stuck to 1 for the moment
         self.n_features = 1
         if X.ndim ==2:
             if X.shape[0] != 1:
@@ -67,17 +87,27 @@ class PhenologyMetrics:
         self._get_amp()
         
     def _get_sos(self):
-        val = np.amin(self.X[...,:self._argmax])+self.sos_thresold*(self.X[...,self._argmax]-np.amin(self.X[...,:self._argmax]))
-        idx = np.searchsorted(self.X,val)
+        amp_sos = self.X[...,self._argmax]-self.X[...,self._argmin_sos]
+        
+        thresold = self.sos_thresold*amp_sos
+        try:
+            idx = self._argmin_sos+np.where(self.X[...,self._argmin_sos:self._argmax+1]>=self.X[...,self._argmin_sos]+thresold)[0][0]
+        except:
+            idx = self._argmin_sos+np.where(self.X[...,self._argmin_sos:self._argmax+1]>=self.X[...,self._argmin_sos]+thresold)[0][0]
+        
         self.sos = idx
     def _get_eos(self):
-        val = np.amin(self.X[...,self._argmax:])+self.eos_thresold*(self.X[...,self._argmax]-np.amin(self.X[...,self._argmax:]))
-        idx = np.searchsorted(self.X[::-1],val,side='right')
-        self.eos = len(self.X)-idx
+        amp_eos = self.X[...,self._argmax]-self.X[...,self._argmin_eos]
+        
+        thresold = (1-self.eos_thresold)*amp_eos
+        
+        idx = self._argmax+np.where(self.X[...,self._argmax:self._argmin_eos+1]<=self.X[...,self._argmax]-thresold)[0][0]
+        
+        self.eos = idx
     def _get_los(self):
         self.los = self.eos-self.sos
     def _get_amp(self):
-        self.amp = self.X[self._argmax]-self.X[self._argmin]
+        self.amp = self.X[self._argmax]-np.min([self._argmin_eos,self._argmin_sos])
         
         
 def _convert_band_to_array_idx(X, expression, n_comp,
@@ -303,9 +333,9 @@ class SmoothSignal:
         self.init_dates = dates
         self.init_n_dates = len(dates)
         self.init_datetime = self.convert_to_datetime(dates, fmt=fmt)
-        self.init_doy = self.convert_to_doy(dates, fmt=fmt)
         self.init_dates_int = self._convert_date_to_integer(
             self.init_datetime, fmt=fmt)
+        self.init_doy = self.convert_to_doy(dates, fmt=fmt)
 
         # output dates
         if output_dates is False:
@@ -315,10 +345,16 @@ class SmoothSignal:
         self.output_doy = self.convert_to_doy(output_dates, fmt=fmt)
         self.output_datetime = self.convert_to_datetime(output_dates, fmt=fmt)
         self.output_dates_int = self._convert_date_to_integer(
-            self.output_datetime, fmt=fmt, start_date=self.init_datetime[0])
+            self.output_datetime, fmt=fmt, start_date = self.init_datetime[0])
         
+        # if temporal sampling is not the same in output
+        if np.unique(np.diff(self.output_dates_int)).size != 1:
+            raise Warning('Please be careful, the output dates have not the same delta. This could cause some problems.')
+        else:
+            self.output_deltadays = int(np.unique(np.diff(self.output_dates_int)))
+        # delta
         self.output_dates_delta = self.output_dates_int[1]-self.output_dates_int[0]
-        
+    
     def _get_time_series_position_per_band(self, X):
         """
         Yields the time series for each band (all the B2, all the B8...)
@@ -367,15 +403,27 @@ class SmoothSignal:
 
         if start_date:
             if convert_to_datetime:
-                day0 = dt.datetime.strptime(str(start_date), fmt=fmt)
+                self.day0 = dt.datetime.strptime(str(start_date), fmt=fmt)
             else:
-                day0 = start_date
+                self.day0 = start_date
         else:
-            day0 = dates[0]
-        dates_start_at_zero = [[date-day0][0].days for date in dates]
+            self.day0 = dates[0]
+        dates_start_at_zero = [[date-self.day0][0].days for date in dates]
 
         return dates_start_at_zero
-
+    
+    def int_to_datetime(self, dates):
+        """
+        Convert list of int to datetime.
+        
+        Parameters
+        -----------
+        dates : list
+            List of int
+        """
+        datetimes = [self.day0+ dt.timedelta(self.output_dates_int[0]) + ( dt.timedelta(i) * self.output_deltadays ) for i in dates]
+        return datetimes
+        
     def convert_to_doy(self, dates, fmt='%Y%m%d'):
         """
         Convert list of dates to Day Of Year (DOY) number.
@@ -402,7 +450,7 @@ class SmoothSignal:
         """
         return [dt.datetime.strptime(str(date), fmt) for date in dates]
 
-    def double_logistic(self, X, kind='cubic'):
+    def double_logistic(self, X, kind='cubic', interpolation_params={}):
         """
         Generate a double logistic curve similar to those of the MODIS phenology product.
         
@@ -418,38 +466,32 @@ class SmoothSignal:
         X = self._resize_if_flatten(X)
         if X.ndim == 2:    
             if X.shape[-1] != self.output_dates_int:
-                X = self.interpolation(X,kind=kind)
+                X = self.interpolation(X,kind=kind,**interpolation_params)
         else:
             raise ValueError('X array must be of shape [2,-1].')
         
-        params = np.asarray([1.0, 5.0, 75.0, 8.0, 250.0, 1.0])+ 10*np.random.rand(6)
+        params = np.asarray([0.0, 1.0, 75.0, 8.0, 250.0, 1.0])+ 10*np.random.rand(6)
         for n_row in range(X.shape[0]):
-            success = False
-            increase_max = 1000
-            while success is False:
-                solver = fun_dl.minimize(fun_dl.cost_function,
-                                  params,
-                                  args=(np.asarray(self.output_dates_int), X[n_row,:]),
-                                  method='L-BFGS-B',
-                                  jac=fun_dl.cost_function_grad,                                 
-                                  options={'gtol': 1e-10,
-                                           'ftol': 1e-10,
-                                           'maxiter':increase_max,
-                                           'maxcor':increase_max,
-                                           'maxfun':increase_max,
-                                           'maxls':100})
             
-                # Show estimated function
-                success = solver.success
-                if success is False:
-                    increase_max += 1000
-                if increase_max == 10000:
-                    success = True
+            increase_max = 100
+        
+            solver = fun_dl.minimize(fun_dl.cost_function,
+                              params,
+                              args=(np.asarray(self.output_dates_int), X[n_row,:]),
+                              method='L-BFGS-B',
+                              jac=fun_dl.cost_function_grad,                                 
+                              options={'gtol': 1e-10,
+                                       'ftol': 1e-10,
+                                       'maxiter':increase_max,
+                                       'maxcor':increase_max,
+                                       'maxfun':increase_max,
+                                       'maxls':100})
+                
             x[n_row,:] = fun_dl.double_logistique(solver.x, np.asarray(self.output_dates_int))
-    
+                
         return x
         
-    def interpolation(self, X, kind='linear', **params):
+    def interpolation(self, X, kind='linear', fill_value='extrapolate', **params):
         """
         Based on :class:`scipy.interpolate.interp1d`
 
@@ -460,7 +502,9 @@ class SmoothSignal:
             A N-D array of real values. The length of y along the interpolation axis must be equal to the length of dates.
         kind : str, default 'linear'
             Specifies the kind of interpolation as a string ('linear', 'nearest', 'zero', 'slinear', 'quadratic', 'cubic', 'previous', 'next', where 'zero', 'slinear', 'quadratic' and 'cubic' refer to a spline interpolation of zeroth, first, second or third order; 'previous' and 'next' simply return the previous or next value of the point) or as an integer specifying the order of the spline interpolator to use. Default is 'linear'.
-
+        fill_value : str, default 'extrapolate'
+            Extrapolate
+        
         References
         ----------
         :class:`scipy.interpolate.interp1d`
@@ -470,14 +514,13 @@ class SmoothSignal:
         for in_band, out_band in self._get_time_series_position_per_band(X):
             tmp = interpolate.interp1d(
                 self.init_dates_int, X[:, in_band], kind=kind, **params)
-            tmp = self._resize_if_flatten(tmp(self.output_dates_int))
-            x[:, out_band] = tmp
+            x[:, out_band] = self._resize_if_flatten(tmp(self.output_dates_int))
         return (x)
 
     def iterative_median(self, X, window_length=3, interpolation_params={}, **params):
         """
         Savitzski golay 
-        Based on :class:`scipy.signal.savgol_filter`
+        Based on :class:`scipy.signal.median_filter`
 
         References
         ----------
@@ -488,8 +531,8 @@ class SmoothSignal:
         for in_band, out_band in self._get_time_series_position_per_band(X):
             tmp = interpolate.interp1d(
                 self.init_dates_int, X[:, in_band], **interpolation_params)
-            x[:, out_band] = self._resize_if_flatten(signal.medfilt(
-                tmp(self.output_dates_int), kernel_size = window_length))
+            x[:, out_band] = self._resize_if_flatten(median_filter(
+                tmp(self.output_dates_int), size = window_length))
         return x
 
     def savitzski_golay(self, X, window_length=3, polyorder=1, interpolation_params={}, **params):

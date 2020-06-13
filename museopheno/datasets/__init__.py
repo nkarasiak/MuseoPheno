@@ -47,7 +47,7 @@ def Sentinel2_3a_2018(return_dates=False, return_random_sample=False):
     --------
     >>> raster,dates = Sentinel2_3a_2018(return_dates=True)
     >>> print(raster)
-    /mnt/DATA/lib/MuseoPheno/museopheno/datasets/2018_3A_Theia_Bouconne.tif
+    /mnt/bigone/lib/MuseoPheno/museopheno/datasets/2018_3A_Theia_Bouconne.tif
     >>> print(dates)
     [20180429, 20180513, 20180708, 20180815, 20180915, 20181015, 20181115]
     >>> Sentinel2_3a_2018(get_only_sample=True)
