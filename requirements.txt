@@ -4,3 +4,4 @@ scikit-learn>=0.16
 matplotlib
 joblib
 museotoolbox
+psutil
