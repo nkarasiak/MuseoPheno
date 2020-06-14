@@ -1,4 +1,16 @@
+# sphinx-gallery temp files
+# Sphinx documentation
+docs/source/_build/
+docs/build/
+docs/source/modules
+docs/source/gen_modules
+docs/source/_autosummary
+docs/source/_static
+docs/source/auto_examples/**.pickle
 docs/source/auto_examples/
+docs/source/auto_examples/**.md5
+docs/modules/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
