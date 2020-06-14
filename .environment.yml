@@ -8,4 +8,5 @@ dependencies:
            - sphinx-gallery
            - joblib
            - museotoolbox
+           - psutil
 
