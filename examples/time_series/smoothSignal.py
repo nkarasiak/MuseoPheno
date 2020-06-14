@@ -60,7 +60,7 @@ x_savgol_linear = ts_manager.savitzski_golay(x,window_length=9,polyorder=1,inter
 
 x_savgol_cubic = ts_manager.savitzski_golay(x,window_length=9,polyorder=1,interpolation_params=dict(kind='cubic'))
 
-x_doublelogistic= ts_manager.double_logistic(x)
+x_doublelogistic = ts_manager.double_logistic(x)
 
 
 #################

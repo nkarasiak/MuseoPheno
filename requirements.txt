@@ -3,4 +3,4 @@ scipy>=1.0
 scikit-learn>=0.16
 matplotlib
 joblib
-museotoolbox>=1.5
+museotoolbox
