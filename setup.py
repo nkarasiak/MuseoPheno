@@ -23,11 +23,10 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
-
 setuptools.setup(
     name='museopheno',
     version=__version__,
-    description='Time series and spectral indice management for Remote Sensing Sensors',
+    description='Time series and spectral indices management for Remote Sensing Sensors',
     long_description=long_description,
     long_description_content_type="text/markdown",
     url='https://github.com/nkarasiak/MuseoPheno',
@@ -42,11 +41,6 @@ setuptools.setup(
             "Programming Language :: Python :: 3",
             "Intended Audience :: Science/Research"],
     zip_safe=False,
-        entry_points = {
-        'console_scripts': [
-            'mp_computeS2SITS=museopheno.sensors.__computeS2SITS:main'
-        ],
-    },
     package_data={
       'museopheno': ['datasets/2018_3A_Theia_Bouconne.tif']
    }
