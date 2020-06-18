@@ -3,10 +3,6 @@
 MuseoPheno documentation
 =============================
 
-.. image:: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_256.png
-   :target: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_256.png
-   :alt: MuseoPheno
-
 .. sidebar:: About MuseoPheno
         
     :Author: `Nicolas Karasiak <http://www.karasiak.net>`_
