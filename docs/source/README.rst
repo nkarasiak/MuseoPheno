@@ -35,16 +35,13 @@ The `documentation is hosted on readthedocs <https://museopheno.readthedocs.org/
 What does MuseoPheno do today ?
 ===============================
 
-MuseoPheno globally eases the way to smooth or compute index for time series from raster or vector.
-
-It has a special feature to compute Sentinel2 level 2A time series by providing a command line to produce a Sentinel2 raster time series :
-``museopheno.computeS2SITS -S2dir /tmp/S2_2018/ -unzip True -out /mnt/SITS_2018.tif``
+MuseoPheno globally eases the way to smooth or compute spectral indices for time series.
 
 Don't manage temporal information, MuseoPheno do it for you
 ===========================================================
 
-Spectral index
---------------
+Spectral indices
+----------------
 
 Let's suppose you want to compute the NDVI, and you know how your bands are ordered in your raster.
 Just define your band order (it supposes your bands are stacked in the following order : band1, band2... for date 1, then band1, band2 for date 2 and so on...)
@@ -58,6 +55,14 @@ You can see the demo here with Leaf Chlorophyll Content.
 
 Temporal resampling and smoothing
 ---------------------------------
+
+It has never been so easy to temporaly resample a time series given an array. Just define the beginning date, the end date, and the delta between acquistion, then MuseoPheno will deal it for you.
+You need to smooth your new time series ? No problem, just use the SmoothSignal class.
+
+Phenological metrics
+--------------------
+
+You can easilly compute phenological metrics (start of season, end of season) using the PhenologyMetrics class from the time_series module.
 
 How do I install it ?
 ---------------------
@@ -74,5 +79,6 @@ What is planning to do MuseoPheno ?
 ===================================
 
 
-* More temporal signal smoothing (double logistic, Whittaker...)
-* Computation and mapping of phenology metrics (start of season, end of season)
+* More temporal signal smoothing (Whittaker...)
+* Lot of examples... so feel free to add !
+* Add tests to check consistency and reliability.

@@ -18,6 +18,21 @@ __version__ = re.search(
     r'__version__\s*=\s*[\'"]([^\'"]*)[\'"]',  # It excludes inline comment too
     open('museopheno/__init__.py').read()).group(1)
 
+
+install_requires = []
+
+with open('./requirements.txt') as requirements_txt:
+    requirements = requirements_txt.read().strip().splitlines()
+    for requirement in requirements:
+        if requirement.startswith('#'):
+            continue
+        elif requirement.startswith('-e '):
+            install_requires.append(requirement.split('=')[1])
+        else:
+            install_requires.append(requirement)
+
+
+
 import setuptools
 
 with open("README.md", "r") as fh:
@@ -33,7 +48,7 @@ setuptools.setup(
     author='Nicolas Karasiak',
     author_email='karasiak.nicolas@gmail.com',
     license='GPLv3',
-    install_requires=["numpy","scipy","matplotlib","scikit-learn","joblib","museotoolbox"],
+    install_requires=install_requires,
     packages=setuptools.find_packages(),
     classifiers=[
             "Topic :: Scientific/Engineering :: Artificial Intelligence",
