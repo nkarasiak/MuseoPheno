@@ -37,8 +37,8 @@ What does MuseoPheno do today ?
 
 MuseoPheno globally eases the way to smooth or compute spectral indices for time series.
 
-Don't manage temporal information, MuseoPheno do it for you
-===========================================================
+Don't manage temporal information, MuseoPheno does it for you
+=============================================================
 
 Spectral indices
 ----------------
@@ -49,7 +49,7 @@ then give MuseoPheno the expression "(B8-B4)/(B8+B4)", and the library will gene
 
 So it takes only a few lines to go from your time series to a temporal spectral index. It is also as fast to produce the indice raster.
 
-You can see the demo here with Leaf Chlorophyll Content.
+You can see the `demo here with Leaf Chlorophyll Content <https://museopheno.readthedocs.io/en/latest/auto_examples/sensors/LeafChlorophyllContentFromS2TimeSeries.html>`_.
 
 *Your index is not listed ?* It is very easy to add a new sensor or to add new index. Just follow the simple documentation.
 
@@ -65,7 +65,7 @@ Phenological metrics
 You can easilly compute phenological metrics (start of season, end of season) using the PhenologyMetrics class from the time_series module.
 
 How do I install it ?
----------------------
+=====================
 
 A package is available on pip :
 ``python3 -m pip install museopheno --user``
