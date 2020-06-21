@@ -485,7 +485,7 @@ class SmoothSignal:
                                        'maxiter':increase_max,
                                        'maxcor':increase_max,
                                        'maxfun':increase_max,
-                                       'maxls':100})
+                                       'maxls':1000})
                 
             x[n_row,:] = fun_dl.double_logistique(solver.x, np.asarray(self.output_dates_int))
                 
