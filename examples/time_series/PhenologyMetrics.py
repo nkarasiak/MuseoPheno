@@ -50,7 +50,6 @@ x_savgol_cubic = ts.savitzski_golay(x,window_length=9,polyorder=5,interpolation_
 
 sos_cub,eos_cub=time_series.get_phenology_metrics(x_savgol_cubic,sos=0.5,eos=0.5)[0]
 sos_lin,eos_lin=time_series.get_phenology_metrics(x_savgol_linear,sos=0.5,eos=0.5)[0]
-
 #x_doublelogistic = ts.doubleLogistic(x,t01=10,t02=120)
 #sos_dl,eos_dl=time_series.getPhenologyMetrics(x_doublelogistic,sos=0.3,eos=0.8)
 #################

@@ -142,6 +142,7 @@ html_logo = '../../metadata/MuseoPheno_logo_128.png'
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
+
 html_static_path = ['_static']
 
 # Custom sidebar templates, must be a dictionary that maps document names
@@ -207,3 +208,5 @@ man_pages = [
 # Grouping the document tree into Texinfo files. List of tuples
 # (source start file, target name, title, author,
 #  dir menu entry, description, category)
+def setup(app):
+    app.add_stylesheet('style.css')  # may also be an URL

@@ -47,7 +47,7 @@ doc :
 	mv README.rst docs/source/
 	cd docs/ && make html
 
-ddoc :
+doc_full :
 	m2r README.md
 	mv README.rst docs/source/
 	rm -rf docs/source/auto_examples/

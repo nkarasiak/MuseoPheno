@@ -31,7 +31,28 @@ from museopheno.time_series import __dl as fun_dl # double logistic by M. Fauvel
 
 import re
 
-def get_phenology_metrics(X,sos=0.2,eos=0.8,min_from_year=True):
+def get_phenology_metrics(X,sos=0.2,eos=0.8,min_from_year=False):
+    """
+    Return indices of phenology metrics (start of season and end of season).
+    
+    Parameters
+    ----------
+    X : array
+        array can be two dimensions (a line per sample)
+    sos : float, optional (default=0.2)
+        Percentage (0.2 for 20%) of the season amplitude
+    eos : float, optional (default=0.8)
+        Percentage (0.8 for 80%) of the season amplitude
+    min_from_year  : bool, optional (default=False)
+        If True, metrics thresolds will be computed using the min from the year
+        If False, metrics thresolds will be computed using the min from the season (start or end).
+    
+    Returns
+    -------
+    Array with as many lines as samples.
+    First column is SOS index, second is EOS index.
+
+    """
     if X.ndim==2 and X.shape[0] != 1:
         feats = np.zeros((X.shape[0],2))
         for feature in range(X.shape[0]):
@@ -53,12 +74,16 @@ class PhenologyMetrics:
     ------------
     X : array
         array (1 dim)
-    sos : float
-        Percentage
-    eos : float
-        Percentage 
+    sos : float, optional (default=0.2)
+        Percentage (0.2 for 20%) of the season amplitude
+    eos : float, optional (default=0.8)
+        Percentage (0.8 for 80%) of the season amplitude
+    min_from_year  : bool, optional (default=False)
+        If True, metrics thresolds will be computed using the min from the year
+        If False, metrics thresolds will be computed using the min from the season (start or end).
+
     """
-    def __init__(self,X,sos=0.2,eos=0.8,min_from_year=True):
+    def __init__(self,X,sos=0.2,eos=0.8,min_from_year=False):
         
         # thresold
         self.sos_thresold = sos
@@ -69,11 +94,16 @@ class PhenologyMetrics:
         self._argmin_sos = np.argmin(X[...,:self._argmax])
         self._argmin_eos = self._argmax+np.argmin(X[...,self._argmax:])
         self._min_from_year = min_from_year
+        """
+        if min_from_year is True:
+            print('Warning : Be careful, this option is in development')
+        """    
         # val
         self._min = np.amin((X[...,self._argmin_sos],X[...,self._argmin_eos]))
         self._max = X[...,self._argmax]
     
         # n_features stuck to 1 for the moment
+        
         self.n_features = 1
         if X.ndim ==2:
             if X.shape[0] != 1:
@@ -84,20 +114,25 @@ class PhenologyMetrics:
         self._get_sos()
         self._get_eos()
         self._get_los()
-        self._get_amp()
+        # self._get_amp()
         
     def _get_sos(self):
-        amp_sos = self.X[...,self._argmax]-self.X[...,self._argmin_sos]
+        if self._min_from_year:
+            amp_sos = self.X[...,self._argmax]-self._min
+        else:
+            amp_sos = self.X[...,self._argmax]-self.X[...,self._argmin_sos]
         
         thresold = self.sos_thresold*amp_sos
-        try:
-            idx = self._argmin_sos+np.where(self.X[...,self._argmin_sos:self._argmax+1]>=self.X[...,self._argmin_sos]+thresold)[0][0]
-        except:
-            idx = self._argmin_sos+np.where(self.X[...,self._argmin_sos:self._argmax+1]>=self.X[...,self._argmin_sos]+thresold)[0][0]
+        
+        idx = self._argmin_sos+np.where(self.X[...,self._argmin_sos:self._argmax+1]>=self.X[...,self._argmin_sos]+thresold)[0][0]
         
         self.sos = idx
     def _get_eos(self):
-        amp_eos = self.X[...,self._argmax]-self.X[...,self._argmin_eos]
+        if self._min_from_year:
+            amp_eos = self.X[...,self._argmax]-self._min
+        else:
+            amp_eos = self.X[...,self._argmax]-self.X[...,self._argmin_eos]
+
         
         thresold = (1-self.eos_thresold)*amp_eos
         
@@ -106,8 +141,8 @@ class PhenologyMetrics:
         self.eos = idx
     def _get_los(self):
         self.los = self.eos-self.sos
-    def _get_amp(self):
-        self.amp = self.X[self._argmax]-np.min([self._argmin_eos,self._argmin_sos])
+    # def _get_amp(self):
+    #     self.amp = self.X[self._argmax]-np.min([self._argmin_eos,self._argmin_sos])
         
         
 def _convert_band_to_array_idx(X, expression, n_comp,
