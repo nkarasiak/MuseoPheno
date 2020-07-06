@@ -12,6 +12,6 @@
 # @site:    www.karasiak.net
 # @git:     www.github.com/nkarasiak/MuseoPheno
 # =============================================================================
-__version__ = "0.1-rc2"
+__version__ = "0.1"
 
 from museopheno import datasets, sensors, time_series

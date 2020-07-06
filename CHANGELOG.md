@@ -8,10 +8,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased : 0.1]
 
+### Added
+- list of additions
+
+### Fixed
+- list of fixes...
+
 ## [2020-07-06 : 0.1-rc2]
-
-### Modified
-
 
 ### Added 
 - Added the choice to compute metrics thresold with the min from season or from the year
