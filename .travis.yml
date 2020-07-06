@@ -16,8 +16,7 @@ script:
 deploy:
   provider: pypi
   user: __token__
-  password:
-    secure: pypi-AgEIcHlwaS5vcmcCJGU2Y2QwMGFjLTgzZTktNDc0MS1hYWYxLTY2ZWI4ZmY2NWM5ZQACO3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJtdXNlb3BoZW5vIl19LCAidmVyc2lvbiI6IDF9AAAGIJtXHl5gQ_BgZPEGR0qMSfv-D5ihpyxvILNBss_7e21Y
+  password: pypi-AgEIcHlwaS5vcmcCJDdiYWUyNTQ3LWVhZTQtNDgxMi1iMDcyLWQwNzVhYTg2ZTc1NAACO3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJtdXNlb3BoZW5vIl19LCAidmVyc2lvbiI6IDF9AAAGIDO3kZuTrT5mNhu8xwZ6lWTYYWg3ahNjUHCBlpv6snpO
   on:
     tags: true
     branch: master
