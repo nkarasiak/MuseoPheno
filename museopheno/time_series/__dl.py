@@ -1,5 +1,5 @@
 import numpy as np
-import matplotlib.pyplot as plt
+
 from scipy.optimize import approx_fprime
 from scipy.optimize import minimize, Bounds
 

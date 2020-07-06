@@ -27,8 +27,8 @@ MuseoPheno documentation
    :alt: PyPI version
 
 
-.. image:: https://api.travis-ci.org/nkarasiak/MuseoPheno.svg?branch=master
-   :target: https://travis-ci.org/nkarasiak/MuseoPheno
+.. image:: https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master
+   :target: https://travis-ci.com/nkarasiak/MuseoPheno
    :alt: Build status
 
 

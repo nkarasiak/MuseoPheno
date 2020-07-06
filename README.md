@@ -1,6 +1,6 @@
 [![Documentation status](https://readthedocs.org/projects/museopheno/badge/?version=latest)](https://museopheno.readthedocs.io/en/latest/?badge=latest)
 [![PyPI version](https://badge.fury.io/py/museopheno.svg)](https://badge.fury.io/py/museopheno)
-[![Build status](https://api.travis-ci.org/nkarasiak/MuseoPheno.svg?branch=master)](https://travis-ci.org/nkarasiak/MuseoPheno)
+[![Build status](https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master)](https://travis-ci.com/nkarasiak/MuseoPheno)
 [![Downloads](https://pepy.tech/badge/museopheno)](https://pepy.tech/project/museopheno)
 
 
