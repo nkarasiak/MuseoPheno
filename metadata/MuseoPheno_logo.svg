@@ -9,9 +9,15 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+<<<<<<< HEAD
    inkscape:export-ydpi="548.92792"
    inkscape:export-xdpi="548.92792"
    inkscape:export-filename="/mnt/DATA/lib/MuseoPheno/metadata/MuseoPheno_logo_512.png"
+=======
+   inkscape:export-ydpi="548.43158"
+   inkscape:export-xdpi="548.43158"
+   inkscape:export-filename="/mnt/bigone/lib/MuseoPheno/metadata/MuseoPheno_logo_512.png"
+>>>>>>> master
    sodipodi:docname="MuseoPheno_logo.svg"
    inkscape:version="1.0 (4035a4fb49, 2020-05-01)"
    id="svg8192"
@@ -125,7 +131,11 @@
      inkscape:current-layer="g1434"
      inkscape:document-units="mm"
      inkscape:cy="50.156487"
+<<<<<<< HEAD
      inkscape:cx="103.05766"
+=======
+     inkscape:cx="89.639654"
+>>>>>>> master
      inkscape:zoom="1.5277975"
      inkscape:pageshadow="2"
      inkscape:pageopacity="0.0"
