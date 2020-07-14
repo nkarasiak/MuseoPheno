@@ -9,4 +9,5 @@ dependencies:
            - joblib
            - museotoolbox
            - psutil
+           - m2r
 

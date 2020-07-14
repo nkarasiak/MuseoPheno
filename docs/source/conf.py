@@ -37,21 +37,13 @@ import sys
 
 autoclass_content = 'both'
 
-source_parsers = {
-   '.md': 'recommonmark.parser.CommonMarkParser',
-}
-
 extensions = [
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx_gallery.gen_gallery',
-    'nbsphinx'
-    #'sphinx.ext.linkcode',
-    #'sphinx.ext.doctest',
-    #'sphinx_automodapi.automodapi'
-    ]
+    'nbsphinx','m2r']
 
 autosummary_generate = True
 # numpydoc_show_class_members=False 

@@ -37,8 +37,7 @@ MuseoPheno documentation
    :alt: Downloads
     
 .. mdinclude:: README.md
-   :start-line: 8
-
+   :skip
 .. toctree::
    :maxdepth: 2
 
