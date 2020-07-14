@@ -43,7 +43,7 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx.ext.napoleon',
     'sphinx_gallery.gen_gallery',
-    'nbsphinx','m2r']
+    'nbsphinx']
 
 autosummary_generate = True
 # numpydoc_show_class_members=False 

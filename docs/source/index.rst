@@ -36,8 +36,8 @@ MuseoPheno documentation
    :target: https://pepy.tech/project/museopheno
    :alt: Downloads
     
-.. mdinclude:: README.md
-   :start-line: 8
+.. include:: README.rst
+   :start-line: 35
 
 .. toctree::
    :maxdepth: 2
