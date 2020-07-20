@@ -41,22 +41,21 @@ uploadpypi :
 	#python setup.py register
 	$(PYTHON) setup.py sdist
 	twine upload dist/*
-
-doc :
-	m2r README.md
-	mv README.rst docs/source/
-	cd docs/ && make html
-
-doc_full :
-	m2r README.md
-	mv README.rst docs/source/
-	rm -rf docs/source/auto_examples/
-	rm -rf docs/source/modules/
-	rm -rf docs/build/
-	cd docs/ && make html
-
 autopep8 :
 	autopep8 -ir museopheno --jobs -1
 
 aautopep8 :
 	autopep8 -air museopheno --jobs -1
+
+doc :
+	m2r README.md CHANGELOG.md
+	mv README.rst CHANGELOG.rst docs/source/
+	cd docs/ && make html
+
+doc_full :
+	m2r README.md CHANGELOG.md
+	mv README.rst CHANGELOG.rst docs/source/
+	rm -rf docs/source/auto_examples/
+	rm -rf docs/source/modules/
+	rm -rf docs/build/
+	cd docs/ && make html

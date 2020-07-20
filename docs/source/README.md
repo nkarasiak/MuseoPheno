@@ -1,9 +1,12 @@
+![MuseoPheno logo](https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png)
+
+[![Build status](https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master)](https://travis-ci.com/nkarasiak/MuseoPheno)
 [![Documentation status](https://readthedocs.org/projects/museopheno/badge/?version=latest)](https://museopheno.readthedocs.io/en/latest/?badge=latest)
+[![Museo Pheno License](https://img.shields.io/github/license/nkarasiak/museopheno.svg)](https://github.com/nkarasiak/MuseoPheno/blob/master/license.txt)
+<!-- [![codecov](https://codecov.io/gh/nkarasiak/MuseoPheno/branch/master/graph/badge.svg)](https://codecov.io/gh/nkarasiak/MuseoPheno) -->
 [![PyPI version](https://badge.fury.io/py/museopheno.svg)](https://badge.fury.io/py/museopheno)
 [![Build status](https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master)](https://travis-ci.com/nkarasiak/MuseoPheno)
 [![Downloads](https://pepy.tech/badge/museopheno)](https://pepy.tech/project/museopheno)
-
-![MuseoPheno logo](https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png)
 
 # MuseoPheno
 

@@ -15,29 +15,9 @@ MuseoPheno documentation
     :Generated: |today|
     :License: GPL v3
     :Version: |release|
-
-
-.. image:: https://readthedocs.org/projects/museopheno/badge/?version=latest
-   :target: https://museopheno.readthedocs.io/en/latest/?badge=latest
-   :alt: Documentation status
-
-
-.. image:: https://badge.fury.io/py/museopheno.svg
-   :target: https://badge.fury.io/py/museopheno
-   :alt: PyPI version
-
-
-.. image:: https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master
-   :target: https://travis-ci.com/nkarasiak/MuseoPheno
-   :alt: Build status
-
-
-.. image:: https://pepy.tech/badge/museopheno
-   :target: https://pepy.tech/project/museopheno
-   :alt: Downloads
     
 .. include:: README.rst
-   :start-line: 35
+   :start-line: 10
 
 .. toctree::
    :maxdepth: 2
@@ -55,6 +35,7 @@ MuseoPheno documentation
    :caption: Documentation API
    
    api
+   CHANGELOG
       
 Indices and tables
 ==================

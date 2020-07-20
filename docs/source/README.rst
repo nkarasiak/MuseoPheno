@@ -1,9 +1,29 @@
+.. role:: raw-html-m2r(raw)
+   :format: html
+
+
+
+.. image:: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png
+   :target: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png
+   :alt: MuseoPheno logo
+
+
+
+.. image:: https://api.travis-ci.com/nkarasiak/MuseoPheno.svg?branch=master
+   :target: https://travis-ci.com/nkarasiak/MuseoPheno
+   :alt: Build status
 
 
 .. image:: https://readthedocs.org/projects/museopheno/badge/?version=latest
    :target: https://museopheno.readthedocs.io/en/latest/?badge=latest
    :alt: Documentation status
 
+
+.. image:: https://img.shields.io/github/license/nkarasiak/museopheno.svg
+   :target: https://github.com/nkarasiak/MuseoPheno/blob/master/license.txt
+   :alt: Museo Pheno License
+
+:raw-html-m2r:`<!-- [![codecov](https://codecov.io/gh/nkarasiak/MuseoPheno/branch/master/graph/badge.svg)](https://codecov.io/gh/nkarasiak/MuseoPheno) -->`
 
 .. image:: https://badge.fury.io/py/museopheno.svg
    :target: https://badge.fury.io/py/museopheno
@@ -18,12 +38,6 @@
 .. image:: https://pepy.tech/badge/museopheno
    :target: https://pepy.tech/project/museopheno
    :alt: Downloads
-
-
-
-.. image:: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png
-   :target: https://github.com/nkarasiak/MuseoPheno/raw/master/metadata/MuseoPheno_logo_128.png
-   :alt: MuseoPheno logo
 
 
 MuseoPheno
