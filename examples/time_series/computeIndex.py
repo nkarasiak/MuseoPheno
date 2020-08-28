@@ -11,7 +11,7 @@ without defining a sensor.
 ##############################################################################
 #   Use sample from Sentinel2 level 3A syntheses (from Theia)
 # --------------------------------------------------------------------
-from museopheno.time_series import ExpressionManager
+from museopheno.time_series import expression_manager
 from museopheno import datasets
 
 X,dates = datasets.Sentinel2_3a_2018(return_dates=True,return_random_sample=True)
@@ -36,7 +36,7 @@ print('Image contains {} dates.'.format(int(X.shape[1]/len(bands_order))))
 
 expression = 'B8/(B2+1)'
 
-result = ExpressionManager(X,bands_order=bands_order,expression=expression)
+result = expression_manager(X,bands_order=bands_order,expression=expression)
 
 print(result)
 

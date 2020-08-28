@@ -231,7 +231,7 @@ def _are_bands_availables(bands_order, expression, compulsory=True):
         return True
 
 
-def ExpressionManager(X, bands_order, expression, interpolate_nan=True,
+def expression_manager(X, bands_order, expression, interpolate_nan=True,
                       divide_X_by=1, multiply_by=1, order_by='date', dtype=np.float32):
     """
     Generate expression/index from an array according to a bands_order, and expression.

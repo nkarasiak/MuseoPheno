@@ -21,7 +21,7 @@ import numpy as np
 import gdal
 import collections
 from museotoolbox.processing import RasterMath as _RasterMath
-from ..time_series import _are_bands_availables, ExpressionManager
+from ..time_series import _are_bands_availables, expression_manager
 
 class SensorManager:
     """
@@ -29,8 +29,6 @@ class SensorManager:
 
     Parameters
     -----------
-    sensor_name : str
-        ex : 'Sentinel2'
     bands_order : list
         list on how band are ordered (e.g. ['2','3','4','8'])
     bands_names : list
@@ -162,7 +160,7 @@ class SensorManager:
         --------
         >>> generate_index(X,expression='B8/B2')
         """
-        X_ = ExpressionManager(
+        X_ = expression_manager(
             X,
             self.bands_order,
             expression=expression,
@@ -201,7 +199,7 @@ class SensorManager:
         """
         rM = _RasterMath(input_raster, message='Computing index')
         rM.add_function(
-            ExpressionManager,
+            expression_manager,
             output_raster,
             dtype=dtype,
             bands_order=self.bands_order,
@@ -383,6 +381,7 @@ class Sentinel2(SensorManager):
             LChloC=['B7 / B5', 'B5 != 0'],
             LAnthoC=['B7 / (B3 - B5) ', '( B3-B5 ) !=0'],
             Chlogreen=['B8A / (B3 + B5)'],
+            NDRESWIR = ['(B6-B12)/(B6+B12)','(B6+B12) != 0'],
             NDVI=['(B8-B4)/(B8+B4)', '(B8+B4) != 0'],
             NDVInarrow=['(B8A-B4)/(B8A+B4)', '(B8A+B4) != 0'],
             NDVIre=['(B8A-B5)/(B8A+B5)', '(B8A+B5) != 0'],
@@ -392,7 +391,8 @@ class Sentinel2(SensorManager):
             S2REP=['35 * ((((B7 + B4)/2) - B5)/(B6 - B5))'],
             IRECI=['(B7-B4)/(B5/B6)', 'np.logical_and(B5 != 0, B6 != 0)'],
             NBR=['(B08 - B12) / (B08 + B12)', '(B08+B12)!=0'],
-            REP=['700 + 40 * (( ( B4 + B7 ) / B2) -5) / ( B6 - B5 ) ']
+            REP=['700 + 40 * (( ( B4 + B7 ) / B2) -5) / ( B6 - B5 ) '],
+            WDRVI_B6B7 = ['(0.1*B7+B6) / (0.1*B7-B6)',' (0.1*B7-B6) != 0']
         )
 
         for idx in index.keys():

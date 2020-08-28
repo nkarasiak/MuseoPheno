@@ -1,0 +1,24 @@
+language: python
+matrix:
+  include:
+  - os: linux
+    sudo: required
+    python: 3.6
+  - os: linux
+    sudo: required
+    python: 3.7
+install:
+- pip install -r requirements.txt
+- pip install .
+
+script:
+- python setup.py develop
+
+deploy:
+  provider: pypi
+  user: __token__
+  password: pypi-AgEIcHlwaS5vcmcCJDdiYWUyNTQ3LWVhZTQtNDgxMi1iMDcyLWQwNzVhYTg2ZTc1NAACO3sicGVybWlzc2lvbnMiOiB7InByb2plY3RzIjogWyJtdXNlb3BoZW5vIl19LCAidmVyc2lvbiI6IDF9AAAGIDO3kZuTrT5mNhu8xwZ6lWTYYWg3ahNjUHCBlpv6snpO
+  on:
+    tags: true
+    branch: master
+  skip_existing: true
